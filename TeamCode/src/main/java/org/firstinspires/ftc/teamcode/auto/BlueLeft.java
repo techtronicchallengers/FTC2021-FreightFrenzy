@@ -34,8 +34,8 @@ import java.util.Locale;
 
 
 
-@Autonomous(name = "BLHWP", group = "League")
-public class BLHWP extends LinearOpMode
+@Autonomous(name = "BlueLeft", group = "League")
+public class BlueLeft extends LinearOpMode
 {
 
     // State used for updating telemetry
