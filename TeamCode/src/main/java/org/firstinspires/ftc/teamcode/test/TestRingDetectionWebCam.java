@@ -44,6 +44,11 @@ public class TestRingDetectionWebCam extends LinearOpMode
             {
                 webCam.startStreaming(320,240, OpenCvCameraRotation.UPSIDE_DOWN);
             }
+
+            @Override
+            public void onError(int errorCode) {
+
+            }
         });
 
         waitForStart();

@@ -45,6 +45,11 @@ public class TestRingDetectionPhoneCam extends LinearOpMode
             {
                 phoneCam.startStreaming(320,240, OpenCvCameraRotation.SIDEWAYS_LEFT);
             }
+
+            @Override
+            public void onError(int errorCode) {
+
+            }
         });
 
         waitForStart();
