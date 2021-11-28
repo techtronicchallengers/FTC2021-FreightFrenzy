@@ -108,6 +108,10 @@ public class TestBasicOpMode_Linear extends LinearOpMode {
             // - This requires no math, but it is hard to drive forward slowly and keep straight.
             // leftPower  = -gamepad1.left_stick_y ;
             // rightPower = -gamepad1.right_stick_y ;
+            if(gamepad1.x)
+            {
+                backLeft.setPower(0.75);
+            }
             if(gamepad1.left_stick_y < 0)
             {
                 backLeft.setPower(Math.abs(gamepad1.left_stick_y));
