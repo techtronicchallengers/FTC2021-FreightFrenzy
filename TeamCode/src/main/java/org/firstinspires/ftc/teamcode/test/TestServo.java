@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.assembly.BobTheDuckBot;
 @TeleOp(name = "ServoTest", group = "Test")
 public class TestServo extends LinearOpMode
 {
-
+    //test program for carousel servo
     private ElapsedTime runtime = new ElapsedTime();
 
     public CRServo wheelServo = null;
