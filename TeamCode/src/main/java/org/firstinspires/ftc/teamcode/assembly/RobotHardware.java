@@ -67,11 +67,14 @@ public class RobotHardware
 
     //Adding the Hardware Map
     private HardwareMap hwMap  = null;
-
+    public CRServo wheelServo = null;
     public  RobotHardware(HardwareMap ahwMap)
     {
         hwMap = ahwMap;
-
+        webcam = hwMap.get(WebcamName.class, "webcam");
+        imu = hwMap.get(BNO055IMU.class, "imu");
+        wheelServo = hwMap.get(CRServo.class, "wheelServo");
+        /*
         //Wheel motors
         frontLeftWheel = hwMap.get(DcMotor.class, "frontLeft");
         frontRightWheel = hwMap.get(DcMotor.class, "frontRight");
@@ -117,8 +120,6 @@ public class RobotHardware
         armReturn = hwMap.get(TouchSensor.class, "armReturn");
         grabTouch = hwMap.get(TouchSensor.class, "grabTouch");
 
-        webcam = hwMap.get(WebcamName.class, "webcam");
-        imu = hwMap.get(BNO055IMU.class, "imu");
 
         rightFrontSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "rightFrontSensor");
         rightBackSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "rightBackSensor");

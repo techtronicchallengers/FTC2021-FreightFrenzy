@@ -13,8 +13,8 @@ public class BobTheDuckBot
     private static RobotHardware robotHardware = null;
     private ChassisAssembly chassisAssembly = null;
     private IntakeAssembly intakeAssembly = null;
-    private DeliverAssembly shooterAssembly = null;
-    private CarouselAssembly wobbleAssembly = null;
+    private DeliverAssembly placerAssembly = null;
+    private CarouselAssembly carouselAssembly = null;
     private SensorNavigation navigation = null;
     private VisualCortex vuforia_tf = null;
 
@@ -23,8 +23,8 @@ public class BobTheDuckBot
         robotHardware = new RobotHardware(hwMap);
         buildChassisAssembly();
         buildIntakeAssembly();
-        buildShooterAssembly();
-        buildWobbleAssembly();
+        buildPlacerAssembly();
+        buildCarouselAssembly();
         buildNavigation();
     }
     public void buildChassisAssembly ()
@@ -43,21 +43,21 @@ public class BobTheDuckBot
     {
         return intakeAssembly;
     }
-    public void buildShooterAssembly ()
+    public void buildPlacerAssembly ()
     {
-        this.shooterAssembly = new DeliverAssembly(robotHardware);
+        this.placerAssembly = new DeliverAssembly(robotHardware);
     }
-    public DeliverAssembly getShooterAssembly()
+    public DeliverAssembly getPlacerAssembly()
     {
-        return shooterAssembly;
+        return placerAssembly;
     }
-    public void buildWobbleAssembly ()
+    public void buildCarouselAssembly ()
     {
-        this.wobbleAssembly = new CarouselAssembly(robotHardware);
+        this.carouselAssembly = new CarouselAssembly(robotHardware);
     }
-    public CarouselAssembly getWobbleAssembly()
+    public CarouselAssembly getCarouselAssembly()
     {
-        return wobbleAssembly;
+        return carouselAssembly;
     }
     public void buildNavigation()
     {

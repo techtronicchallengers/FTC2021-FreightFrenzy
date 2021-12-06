@@ -28,7 +28,7 @@ public class TestServo extends LinearOpMode
         {
             if(gamepad1.y)
             {
-                wheelServo.setPower(0.75);
+                wheelServo.setPower(-1);
             }
             else{
                 wheelServo.setPower(0);
