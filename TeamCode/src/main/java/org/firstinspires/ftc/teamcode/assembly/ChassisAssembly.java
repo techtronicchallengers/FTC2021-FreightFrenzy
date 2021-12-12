@@ -98,6 +98,7 @@ public class ChassisAssembly
         robotHardware.frontRightWheel.setPower(speed);
         robotHardware.backRightWheel.setPower(-speed);
     }
+    /*
 
     public void diagonalForwardLeft (double speed)
     {
@@ -127,7 +128,7 @@ public class ChassisAssembly
         robotHardware.frontRightWheel.setPower(-speed);
         robotHardware.backRightWheel.setPower(0);
     }
-
+    */
     /**
      * Stops the robot by setting the power of all wheels to 0
      */

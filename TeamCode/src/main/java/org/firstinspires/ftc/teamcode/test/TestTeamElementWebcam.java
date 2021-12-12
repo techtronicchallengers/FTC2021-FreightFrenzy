@@ -122,7 +122,7 @@ public class TestTeamElementWebcam extends LinearOpMode
                         pixel = input.get(i, j);
                         if (pixel != null && pixel.length > 0) {
                             greenValue = pixel[1];
-                            if (greenValue >= 100) {
+                            if (greenValue >= 180) {
                                 middleCount++;
                             }
                         } else {

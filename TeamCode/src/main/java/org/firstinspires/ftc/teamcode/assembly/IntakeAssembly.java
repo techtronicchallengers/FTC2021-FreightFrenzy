@@ -23,7 +23,7 @@ public class IntakeAssembly
     {
         robotHardware.intaker.setPower(0.0);
     }
-
+    /*
     public void guardUp()
     {
         robotHardware.guard.setPosition(0.8);
@@ -33,4 +33,6 @@ public class IntakeAssembly
     {
         robotHardware.guard.setPosition(0.05);
     }
+    */
+
 }

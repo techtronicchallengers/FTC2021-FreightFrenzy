@@ -246,8 +246,8 @@ public Mat processFrame(Mat input) {
 
     // if there is no yellow regions on a side
     // that side should be blank
-    if (left) location = "LEFT";
-    else if (right) location = "MIDDLE";
+    if (left) location = "MIDDLE";
+    else if (right) location = "LEFT";
         // if both are false, then there's no teamelement in front.
     else location ="RIGHT";
 
@@ -278,11 +278,11 @@ public Mat processFrame(Mat input) {
     // We create a HSV range for yellow to detect regular stones
     // NOTE: In OpenCV's implementation,
     // Hue values are half the real value
-    //Scalar lowHSV = new Scalar(20, 100, 100); // lower bound HSV for yellow
-    //Scalar highHSV = new Scalar(30, 255, 255); // higher bound HSV for yellow
+    Scalar lowHSV = new Scalar(20, 100, 100); // lower bound HSV for yellow
+    Scalar highHSV = new Scalar(30, 255, 255); // higher bound HSV for yellow
 
-    Scalar lowHSV = new Scalar(65, 60, 60); // lower bound HSV for green
-    Scalar highHSV = new Scalar(80, 255, 255); // higher bound HSV for green
+    //Scalar lowHSV = new Scalar(65, 60, 60); // lower bound HSV for green
+    //Scalar highHSV = new Scalar(80, 255, 255); // higher bound HSV for green
 
     Mat thresh = new Mat();
 
