@@ -28,7 +28,7 @@ public class RobotHardware
     public DcMotor backRightWheel = null;
 
     public DcMotor intaker = null;
-    //public DcMotor lift = null;
+    public DcMotor lift = null;
     //public DcMotor shooter = null;
     //public DcMotor arm = null;
 

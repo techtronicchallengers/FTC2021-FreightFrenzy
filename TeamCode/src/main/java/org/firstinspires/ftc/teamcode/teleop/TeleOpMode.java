@@ -31,6 +31,9 @@ public class TeleOpMode extends LinearOpMode
     final double COUNTS_PER_MOTOR_REV    = 537.6;
     final double DRIVE_GEAR_REDUCTION = 1;
     final double WHEEL_DIAMETER_INCHES = 4.0;
+    final double LIFT_WHEEL_DIAMETER = 1.37795;
+    final double LIFT_COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (LIFT_WHEEL_DIAMETER * Math.PI);
     final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * Math.PI);
     final double COUNTS_PER_DEGREE = 9;
@@ -311,6 +314,74 @@ public class TeleOpMode extends LinearOpMode
             frenzyBot.getChassisAssembly().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
     }//end of encoderTurn
+
+    public void encoderLiftDrive(double speed, double inches, double timeoutS)
+{
+    double setSpeed = speed;
+    int newLiftTarget;
+
+    // Ensure that the opmode is still active
+    if (opModeIsActive()) {
+
+        frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Determine new target position, and pass to motor controller
+        newLiftTarget = frenzyBot.getRobotHardware().lift.getCurrentPosition() + (int)(inches * LIFT_COUNTS_PER_INCH);
+
+        frenzyBot.getRobotHardware().lift.setTargetPosition(newLiftTarget);
+
+        // Turn On RUN_TO_POSITION
+        frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+        // reset the timeout time and start motion.
+        runtime.reset();
+
+        speed = 0.1;
+        // keep looping while we are still active, and there is time left, and both motors are running.
+        while (opModeIsActive() &&
+                (runtime.seconds() < timeoutS) &&
+                (frenzyBot.getRobotHardware().lift.isBusy())) {
+
+            while((Math.abs(frenzyBot.getRobotHardware().lift.getCurrentPosition()) < Math.abs(newLiftTarget)
+                    && Math.abs(speed) < Math.abs(setSpeed)))
+            {
+                frenzyBot.getRobotHardware().lift.setPower(Math.abs(speed));
+                speed = speed + 0.005;
+            }
+
+            // Display it for the driver.
+            telemetry.addData("Path1",  "Running to %7d",
+                    newLiftTarget);
+            telemetry.addData("Path2",  "Running at %7d",
+                    frenzyBot.getChassisAssembly().getBackLeftWheelCurrentPosition(), frenzyBot.getRobotHardware().lift.getCurrentPosition());
+            telemetry.update();
+        }
+
+        // Stop all motion;
+        frenzyBot.getRobotHardware().lift.setPower(0);
+
+        // Turn off RUN_TO_POSITION
+        frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+}//end of liftEncoderDrive
+
+    public void lift(int level) {
+        if(level == 1) {
+            encoderLiftDrive(0.1,2, 5);
+
+        }
+        else if(level == 2) {
+            encoderLiftDrive(0.1,4, 5);
+        }
+        else if(level == 3) {
+            encoderLiftDrive(0.1,6,5);
+        }
+    }
+    public void resetLift(){
+    }
+
 
     String formatAngle(AngleUnit angleUnit, double angle) {
         return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
