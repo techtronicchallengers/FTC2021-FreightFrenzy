@@ -12,7 +12,7 @@ public class SensorNavigation
         robotHardware = hardware;
     }
 
-
+/*
     public double frontRightDistance(){return robotHardware.frontRightSensor.getDistance(DistanceUnit.INCH);}
     public double backRightDistance(){return robotHardware.backRightSensor.getDistance(DistanceUnit.INCH);};
 
@@ -73,6 +73,6 @@ public class SensorNavigation
     public double frontDistance() { return robotHardware.frontLaser.getDistance(DistanceUnit.INCH);}
 
 
-
+*/
 
 }

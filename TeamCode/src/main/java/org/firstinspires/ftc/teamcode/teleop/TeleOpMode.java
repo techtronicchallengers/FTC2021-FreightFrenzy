@@ -84,6 +84,41 @@ public class TeleOpMode extends LinearOpMode
         }
         while (opModeIsActive())
         {
+            double drive = gamepad1.left_stick_y;
+            double turn = gamepad1.left_stick_x;
+
+            //Movement
+            /*
+            if (drive < 0) {
+                frenzyBot.getChassisAssembly().moveForward(Math.abs(drive));
+            }
+            else if (drive > 0){
+                frenzyBot.getChassisAssembly().moveBackwards(Math.abs(drive));
+            }
+            //turn right
+            else if (turn > 0) {
+                frenzyBot.getChassisAssembly().turnRight(Math.abs(turn));
+            }
+            //turn left
+            else if (turn < 0) {
+                frenzyBot.getChassisAssembly().turnLeft(Math.abs(turn));
+            }
+            else{
+                frenzyBot.getChassisAssembly().moveForward(0);
+
+            }
+
+
+             */
+            if(gamepad1.x == true){
+
+                frenzyBot.getIntakeAssembly().intake();
+            }
+            else{
+                frenzyBot.getIntakeAssembly().stopIntake();
+            }
+            frenzyBot.getChassisAssembly().forwardTurn(-gamepad1.left_stick_y, gamepad1.left_stick_x);
+
 
         }
 

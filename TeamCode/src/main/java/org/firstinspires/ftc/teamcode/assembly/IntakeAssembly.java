@@ -12,18 +12,19 @@ public class IntakeAssembly
 
     public void intake()
     {
-        robotHardware.intaker.setPower(intakeSpeed);
+        robotHardware.intaker.setPower(-1);
     }
+    /*
     public void outake()
     {
         robotHardware.intaker.setPower(-intakeSpeed);
     }
-
+*/
     public void stopIntake()
     {
         robotHardware.intaker.setPower(0.0);
     }
-    /*
+/*
     public void guardUp()
     {
         robotHardware.guard.setPosition(0.8);

@@ -28,13 +28,13 @@ public class RobotHardware
     public DcMotor backRightWheel = null;
 
     public DcMotor intaker = null;
-    public DcMotor lift = null;
+    //public DcMotor lift = null;
     //public DcMotor shooter = null;
     //public DcMotor arm = null;
 
-    public Servo intakeBox = null;
-    public CRServo carouselServo = null;
-    public Servo rampServo = null;
+    //public Servo intakeBox = null;
+    //public CRServo carouselServo = null;
+    //public Servo rampServo = null;
     //public Servo gripper = null;
     //public Servo door = null;
     //public Servo guard = null;
@@ -46,34 +46,34 @@ public class RobotHardware
     public BNO055IMU imu;
 
     //Distance Sensors
-    Rev2mDistanceSensor frontRightSensor = null;
-    Rev2mDistanceSensor backRightSensor = null;
-    Rev2mDistanceSensor frontLeftSensor = null;
-    Rev2mDistanceSensor backLeftSensor = null;
+    //Rev2mDistanceSensor frontRightSensor = null;
+    //Rev2mDistanceSensor backRightSensor = null;
+    //Rev2mDistanceSensor frontLeftSensor = null;
+    //Rev2mDistanceSensor backLeftSensor = null;
 
     //Distance Sensors
-    public ModernRoboticsI2cRangeSensor rightFrontSensor = null;
-    public ModernRoboticsI2cRangeSensor rightBackSensor = null;
-    public ModernRoboticsI2cRangeSensor backSensor = null;
+    //public ModernRoboticsI2cRangeSensor rightFrontSensor = null;
+    //public ModernRoboticsI2cRangeSensor rightBackSensor = null;
+    //public ModernRoboticsI2cRangeSensor backSensor = null;
 
-    Rev2mDistanceSensor backLaser = null;
-    Rev2mDistanceSensor frontLaser = null;
+    //Rev2mDistanceSensor backLaser = null;
+    //Rev2mDistanceSensor frontLaser = null;
 
     //Touch Sensors
-    public TouchSensor liftTouchSensor = null;
+   // public TouchSensor liftTouchSensor = null;
    // public TouchSensor topTouch = null;
     //public TouchSensor armReturn = null;
     //public TouchSensor grabTouch = null;
 
     //Adding the Hardware Map
     private HardwareMap hwMap  = null;
-    public CRServo wheelServo = null;
+    //public CRServo wheelServo = null;
     public  RobotHardware(HardwareMap ahwMap)
     {
         hwMap = ahwMap;
         webcam = hwMap.get(WebcamName.class, "webcam");
         imu = hwMap.get(BNO055IMU.class, "imu");
-        wheelServo = hwMap.get(CRServo.class, "wheelServo");
+       // wheelServo = hwMap.get(CRServo.class, "wheelServo");
 
         //Wheel motors
         frontLeftWheel = hwMap.get(DcMotor.class, "frontLeft");
@@ -94,10 +94,11 @@ public class RobotHardware
         intaker = hwMap.get(DcMotor.class, "intaker");
         intaker.setDirection(DcMotor.Direction.FORWARD);
         intaker.setZeroPowerBehavior((DcMotor.ZeroPowerBehavior.FLOAT));
-
+/*
         lift = hwMap.get(DcMotor.class, "lift");
         lift.setDirection(DcMotor.Direction.REVERSE);
         lift.setZeroPowerBehavior((DcMotor.ZeroPowerBehavior.BRAKE));
+ */
         /*
         shooter = hwMap.get(DcMotor.class, "shooter");
         shooter.setDirection(DcMotor.Direction.FORWARD);
@@ -107,16 +108,19 @@ public class RobotHardware
         arm.setDirection(DcMotor.Direction.FORWARD);
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         */
+        /*
         intakeBox = hwMap.get(Servo.class, "intakeBox");
         carouselServo = hwMap.get(CRServo.class, "carouselServo");
         rampServo = hwMap.get(Servo.class, "rampServo");
+
+         */
         /*
         gripper = hwMap.get(Servo.class, "gripper");
         door = hwMap.get(Servo.class, "door");
         guard = hwMap.get(Servo.class, "guard");
 
         */
-        liftTouchSensor = hwMap.get(TouchSensor.class, "liftTouchSensor");
+      // liftTouchSensor = hwMap.get(TouchSensor.class, "liftTouchSensor");
         /*
         topTouch = hwMap.get(TouchSensor.class, "topTouch");
         armReturn = hwMap.get(TouchSensor.class, "armReturn");
@@ -138,7 +142,11 @@ public class RobotHardware
         frontLaser = hwMap.get(Rev2mDistanceSensor.class, "frontSensor");
 */
 
+
+
+
     }
+
     public HardwareMap getHwMap() {
         return hwMap;
     }

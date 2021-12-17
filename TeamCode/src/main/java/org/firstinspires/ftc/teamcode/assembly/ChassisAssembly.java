@@ -27,6 +27,16 @@ public class ChassisAssembly
      * Moves the robot forward by giving power to all four wheels
      * @param speed at which the wheel motors will turn
      */
+
+
+    public void forwardTurn (double speed, double turn){
+        robotHardware.frontLeftWheel.setPower(speed+turn);
+        robotHardware.frontRightWheel.setPower(speed-turn);
+        robotHardware.backLeftWheel.setPower(speed+turn);
+        robotHardware.backRightWheel.setPower(speed-turn);
+
+    }
+
     public void moveForward(double speed)
     {
         robotHardware.frontLeftWheel.setPower(speed);

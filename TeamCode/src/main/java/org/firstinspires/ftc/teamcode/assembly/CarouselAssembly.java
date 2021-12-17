@@ -18,6 +18,7 @@ public class CarouselAssembly
     {
         robotHardware = hardware;
     }
+    /*
     public void rotateRedCarousel() {
         robotHardware.carouselServo.setDirection(DcMotorSimple.Direction.REVERSE);
     }
@@ -25,6 +26,6 @@ public class CarouselAssembly
     public void rotateBlueCarousel() {
         robotHardware.carouselServo.setDirection(DcMotorSimple.Direction.FORWARD);
     }
-
+*/
 
 }

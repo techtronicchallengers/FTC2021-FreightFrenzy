@@ -33,7 +33,7 @@ public class DeliverAssembly
     {
         robotHardware = hardware;
     }
-
+/*
     public void lift(int level) {
         //robotHardware.lift;
         //DcMotorSimple.Direction.FORWARD
@@ -55,5 +55,5 @@ public class DeliverAssembly
         robotHardware.intakeBox.setPosition(BotConstants.UP_POSITION);
         lift(0);
     }
-
+*/
 }
