@@ -32,13 +32,14 @@ public class RobotHardware
     //public DcMotor shooter = null;
     //public DcMotor arm = null;
 
-    //public Servo intakeBox = null;
-    //public CRServo carouselServo = null;
-    //public Servo rampServo = null;
+    public Servo intakeBox = null;
+    public CRServo carouselServo = null;
+    public Servo rampServo = null;
     //public Servo gripper = null;
     //public Servo door = null;
     //public Servo guard = null;
 
+    public TouchSensor liftLimit = null;
 
     //Webcam
     public WebcamName webcam = null;
@@ -92,13 +93,13 @@ public class RobotHardware
         backRightWheel.setZeroPowerBehavior((DcMotor.ZeroPowerBehavior.BRAKE));
 
         intaker = hwMap.get(DcMotor.class, "intaker");
-        intaker.setDirection(DcMotor.Direction.FORWARD);
         intaker.setZeroPowerBehavior((DcMotor.ZeroPowerBehavior.FLOAT));
-/*
+
         lift = hwMap.get(DcMotor.class, "lift");
-        lift.setDirection(DcMotor.Direction.REVERSE);
+        lift.setDirection(DcMotor.Direction.FORWARD);
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lift.setZeroPowerBehavior((DcMotor.ZeroPowerBehavior.BRAKE));
- */
+
         /*
         shooter = hwMap.get(DcMotor.class, "shooter");
         shooter.setDirection(DcMotor.Direction.FORWARD);
@@ -108,12 +109,13 @@ public class RobotHardware
         arm.setDirection(DcMotor.Direction.FORWARD);
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         */
-        /*
+
         intakeBox = hwMap.get(Servo.class, "intakeBox");
         carouselServo = hwMap.get(CRServo.class, "carouselServo");
         rampServo = hwMap.get(Servo.class, "rampServo");
 
-         */
+        liftLimit = hwMap.get(TouchSensor.class, "liftLimit");
+
         /*
         gripper = hwMap.get(Servo.class, "gripper");
         door = hwMap.get(Servo.class, "door");

@@ -2,18 +2,18 @@ package org.firstinspires.ftc.teamcode.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.teamcode.assembly.BobTheDuckBot;
 import org.firstinspires.ftc.teamcode.assembly.ChassisAssembly;
 import org.firstinspires.ftc.teamcode.assembly.SensorNavigation;
 import org.firstinspires.ftc.teamcode.assembly.VisualCortex;
-import org.firstinspires.ftc.teamcode.assembly.BobTheDuckBot;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import org.firstinspires.ftc.robotcore.external.Func;
@@ -22,101 +22,80 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.opencv.core.Mat;
+
 import org.opencv.core.Size;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvPipeline;
 
+import org.openftc.easyopencv.OpenCvPipeline;
+import org.opencv.core.Core;
+
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
 import java.util.List;
+
 import java.util.Locale;
 
+import org.firstinspires.ftc.teamcode.assembly.BobTheDuckBot;
 
+@Autonomous(name = "RedDuck")
 
-@Autonomous(name = "BlueLeft", group = "League")
-public class BlueLeft extends LinearOpMode
+public class RedDuck extends LinearOpMode
 {
-
-    // State used for updating telemetry
-    Orientation angles;
-    Acceleration gravity;
-
     //Encoder Constants
     final double COUNTS_PER_MOTOR_REV    = 537.6;
     final double DRIVE_GEAR_REDUCTION = 1;
     final double WHEEL_DIAMETER_INCHES = 4.0;
-    final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+    final double WHEEL_DIAMETER_INCHES_BIG = 5.0;
+    final double COUNTS_PER_INCH_4 = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * Math.PI);
-    final double COUNTS_PER_SIDE_INCH = 50;
-    final double COUNTS_PER_DEGREE = 6.59;
-    double PUSHER_POS = 0;
-
-    //target constants
-    private static final float mmPerInch = 25.4f;
-    private static final float mmTargetHeight = (6) * mmPerInch;          // the height of the center of the target image above the floor
-
-    // Servo Positions
-
-
-    //Movement Constants
-    final double WHEEL_SPEED = 1;
-    final double SIDE_SHIFT = 6;
-
-    //Creating a  robot object
-    BobTheDuckBot frenzyBot = new BobTheDuckBot();
-    VisualCortex vcortex = null;
-    SensorNavigation nav = null;
-    ChassisAssembly chassis = null;;
-    List<VuforiaTrackable> allTrackables = null;
-
-
-    //Time
-    ElapsedTime runtime = new ElapsedTime();
+    final double COUNTS_PER_INCH_5 = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES_BIG * Math.PI);
+    final double COUNTS_PER_DEGREE = 5.4;
 
     OpenCvCamera webCam;
-    RingDeterminationPipeline pipeline;
-    int numRings;
+    SenseTest.TeamElementDeterminationPipeline pipeline;
+
+    BobTheDuckBot frenzyBot = new BobTheDuckBot();
+    ChassisAssembly chassis = null;
+
+    ElapsedTime runtime = new ElapsedTime();
+
+    Orientation angles;
+    Acceleration gravity;
+
+    double flipUp = 0.4;
+    double flipDown = 0.2;
+    double rampUp = 0.45;
+
+    String tsePos = "unknown";
 
     @Override public void runOpMode()
     {
-        //Intialize Robot
         frenzyBot.initRobot(hardwareMap);
-        nav = frenzyBot.getNavigation();
+        //nav = frenzyBot.getNavigation();
         chassis = frenzyBot.getChassisAssembly();
 
-        //Gyro Setup/Initialization
-        // Set up the parameters with which we will use our IMU. Note that integration
-        // algorithm here just reports accelerations to the logcat log; it doesn't actually
-        // provide positional information.
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "imuCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag          = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-
-        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
-        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
-        // and named "imu".
-        frenzyBot.getRobotHardware().imu.initialize(parameters);
-
-        // Set up our telemetry dashboard
-        composeTelemetry();
-        telemetry.update();
-
-        //Initilize Vuforia and tensor flow
-        /* frenzyBot.initializeVuforiaAndTensorFlow();  //uncomment this when vuforia and tflod is needed
-         frenzyBot.loadVuforiaTrackables();
-         vcortex = frenzyBot.getVisualCortex();
-        allTrackables = vcortex.getAllTrackables();
-        */
-        // Initialize Easy CV for ring detection using webcam
-        int cameraMonitorViewId = frenzyBot.getRobotHardware().getHwMap().appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webCam = OpenCvCameraFactory.getInstance().createWebcam( frenzyBot.getRobotHardware().getHwMap().get(WebcamName.class, "webcam"), cameraMonitorViewId);
-        pipeline = new RingDeterminationPipeline(telemetry);
+        frenzyBot.initRobot(hardwareMap);
+/*
+        int cameraMonitorViewId = frenzyBot.getRobotHardware().getHwMap().appContext.getResources().getIdentifier("cameraMonitorViewId", "id", frenzyBot.getRobotHardware().getHwMap().appContext.getPackageName());
+        webCam = OpenCvCameraFactory.getInstance().createWebcam(frenzyBot.getRobotHardware().getHwMap().get(WebcamName.class, "webcam"), cameraMonitorViewId);
+        pipeline = new SenseTest.TeamElementDeterminationPipeline(telemetry);
         webCam.setPipeline(pipeline);
+
+        // We set the viewport policy to optimized view so the preview doesn't appear 90 deg
+        // out when the RC activity is in portrait. We do our actual image processing assuming
+        // landscape orientation, though.
+        //       webCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
+
         webCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
@@ -131,16 +110,52 @@ public class BlueLeft extends LinearOpMode
             }
         });
 
-
+        telemetry.addData("currentLocation", pipeline.getFrameLocation());
+        telemetry.update();
+*/
         //Wait for Start
         telemetry.addData("Waiting for start", "");
+        waitForStart();
 
+        rampSpeedEncoderDrive(1.0, 25, 7);
+        encoderDrive(1, 2, 7);
+        frenzyBot.getRobotHardware().rampServo.setPosition(rampUp);
+        frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
+        encoderTurn(1.0, 120, 7);
+        rampSpeedEncoderDrive(1, -12, 7);
+        frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frenzyBot.getRobotHardware().lift.setTargetPosition(-1425);
 
+        frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frenzyBot.getRobotHardware().lift.setPower(-0.5);
+        sleep(1500);
+        frenzyBot.getRobotHardware().intakeBox.setPosition(flipDown);
+        sleep(300);
+        frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
 
+        sleep(400);
+        frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        while(!frenzyBot.getRobotHardware().liftLimit.isPressed()){
+            frenzyBot.getRobotHardware().lift.setPower(0.5);
+        }
+        frenzyBot.getRobotHardware().lift.setPower(0);
+
+        rampSpeedEncoderDrive(1, 40, 7);
+        encoderDrive(1, 2, 7);
+
+        encoderTurn(1, 75, 7);
+
+        encoderDrive(1, 5, 7);
+
+        frenzyBot.getRobotHardware().carouselServo.setPower(-1);
+
+        sleep(3000);
+
+        frenzyBot.getRobotHardware().carouselServo.setPower(0);
+
+        rampSpeedEncoderDrive(1, -20, 7);
 
     }
-
-
 
     public void turnToAngle(double speed, double desiredAngle, int numLoops)
     {
@@ -250,30 +265,6 @@ public class BlueLeft extends LinearOpMode
     }
 
 
-    /*
-    public void straightenLeft(double timeOut)
-    {
-        double angle = -frenzyBot.getNavigation().leftAngle();
-        ElapsedTime senseTime = new ElapsedTime();
-        while(Math.abs(angle) > 15 && opModeIsActive() && senseTime.seconds() < timeOut)
-        {
-            angle = -frenzyBot.getNavigation().leftAngle();
-        }
-        if(angle > 50)
-        {
-            angle = 0;
-        }
-        telemetry.addData("Angle", angle);
-        telemetry.update();
-
-        if(Math.abs(angle) > 5)
-        {
-            encoderTurn(WHEEL_SPEED, angle, 5);
-        }
-    }
-     */
-
-
     /**
      *ENCODER DRIVE METHOD
      * @param speed (at which the robot should move)
@@ -294,10 +285,10 @@ public class BlueLeft extends LinearOpMode
             frenzyBot.getChassisAssembly().changeToEncoderMode();
 
             // Determine new target position, and pass to motor controller
-            newBackLeftTarget = frenzyBot.getChassisAssembly().getBackLeftWheelCurrentPosition() + (int)(inches * COUNTS_PER_INCH);
-            newBackRightTarget = frenzyBot.getChassisAssembly().getBackRightWheelCurrentPosition() + (int)(inches * COUNTS_PER_INCH);
-            newFrontLeftTarget = frenzyBot.getChassisAssembly().getFrontLeftWheelCurrentPosition() + (int)(inches * COUNTS_PER_INCH);
-            newFrontRightTarget = frenzyBot.getChassisAssembly().getFrontRightWheelCurrentPosition() + (int)(inches * COUNTS_PER_INCH);
+            newBackLeftTarget = frenzyBot.getChassisAssembly().getBackLeftWheelCurrentPosition() + (int)(inches * COUNTS_PER_INCH_4);
+            newBackRightTarget = frenzyBot.getChassisAssembly().getBackRightWheelCurrentPosition() + (int)(inches * COUNTS_PER_INCH_4);
+            newFrontLeftTarget = frenzyBot.getChassisAssembly().getFrontLeftWheelCurrentPosition() + (int)(inches * COUNTS_PER_INCH_5);
+            newFrontRightTarget = frenzyBot.getChassisAssembly().getFrontRightWheelCurrentPosition() + (int)(inches * COUNTS_PER_INCH_5);
 
 
             frenzyBot.getChassisAssembly().setBackLeftWheelTargetPosition(newBackLeftTarget);
@@ -384,10 +375,10 @@ public class BlueLeft extends LinearOpMode
             frenzyBot.getChassisAssembly().changeToEncoderMode();
 
             // Determine new target position, and pass to motor controller
-            newBackLeftTarget = frenzyBot.getChassisAssembly().getBackLeftWheelCurrentPosition() + (int)(inches * COUNTS_PER_INCH);
-            newBackRightTarget = frenzyBot.getChassisAssembly().getBackRightWheelCurrentPosition() + (int)(inches * COUNTS_PER_INCH);
-            newFrontLeftTarget = frenzyBot.getChassisAssembly().getFrontLeftWheelCurrentPosition() + (int)(inches * COUNTS_PER_INCH);
-            newFrontRightTarget = frenzyBot.getChassisAssembly().getFrontRightWheelCurrentPosition() + (int)(inches * COUNTS_PER_INCH);
+            newBackLeftTarget = frenzyBot.getChassisAssembly().getBackLeftWheelCurrentPosition() + (int)(inches * COUNTS_PER_INCH_4);
+            newBackRightTarget = frenzyBot.getChassisAssembly().getBackRightWheelCurrentPosition() + (int)(inches * COUNTS_PER_INCH_4);
+            newFrontLeftTarget = frenzyBot.getChassisAssembly().getFrontLeftWheelCurrentPosition() + (int)(inches * COUNTS_PER_INCH_5);
+            newFrontRightTarget = frenzyBot.getChassisAssembly().getFrontRightWheelCurrentPosition() + (int)(inches * COUNTS_PER_INCH_5);
 
 
 
@@ -436,6 +427,7 @@ public class BlueLeft extends LinearOpMode
     }//end of encoderDrive
 
     public void encoderTurn(double speed, double degrees, double timeoutS) {
+        double setSpeed = speed;
         int newBackLeftTarget;
         int newBackRightTarget;
         int newFrontLeftTarget;
@@ -456,25 +448,55 @@ public class BlueLeft extends LinearOpMode
             // Turn On RUN_TO_POSITION
             frenzyBot.getChassisAssembly().setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-
+            // keep looping while we are still active, and there is time left, and both motors are running.
             // reset the timeout time and start motion.
             runtime.reset();
-            frenzyBot.getChassisAssembly().setBackLeftWheelPower(Math.abs(speed));
-            frenzyBot.getChassisAssembly().setBackRightWheelPower(Math.abs(speed));
-            frenzyBot.getChassisAssembly().setFrontLeftWheelPower(Math.abs(speed));
-            frenzyBot.getChassisAssembly().setFrontRightWheelPower(Math.abs(speed));
 
-
+            speed = 0.1;
             // keep looping while we are still active, and there is time left, and both motors are running.
             while (opModeIsActive() &&
                     (runtime.seconds() < timeoutS) &&
                     (frenzyBot.getChassisAssembly().isBackLeftWheelBusy() && frenzyBot.getChassisAssembly().isBackRightWheelBusy() &&
                             frenzyBot.getChassisAssembly().isFrontLeftWheelBusy() && frenzyBot.getChassisAssembly().isFrontRightWheelBusy())) {
 
+                while((Math.abs(frenzyBot.getChassisAssembly().getFrontLeftWheelCurrentPosition()) < Math.abs(newFrontLeftTarget/4)
+                        && Math.abs(speed) < Math.abs(setSpeed)))
+                {
+                    frenzyBot.getChassisAssembly().setBackLeftWheelPower(Math.abs(speed));
+                    frenzyBot.getChassisAssembly().setBackRightWheelPower(Math.abs(speed));
+                    frenzyBot.getChassisAssembly().setFrontLeftWheelPower(Math.abs(speed));
+                    frenzyBot.getChassisAssembly().setFrontRightWheelPower(Math.abs(speed));
+                    speed = speed + 0.0015;
+                }
+                while((Math.abs(speed) < Math.abs(setSpeed))
+                        && Math.abs(frenzyBot.getChassisAssembly().getFrontLeftWheelCurrentPosition()) < Math.abs(newFrontLeftTarget/2))
+                {
+                    frenzyBot.getChassisAssembly().setBackLeftWheelPower(Math.abs(speed));
+                    frenzyBot.getChassisAssembly().setBackRightWheelPower(Math.abs(speed));
+                    frenzyBot.getChassisAssembly().setFrontLeftWheelPower(Math.abs(speed));
+                    frenzyBot.getChassisAssembly().setFrontRightWheelPower(Math.abs(speed));
+                    speed = speed + 0.005;
+                }
+                while(Math.abs(frenzyBot.getChassisAssembly().getFrontLeftWheelCurrentPosition()) < Math.abs(newFrontLeftTarget/2))
+                {
+                    frenzyBot.getChassisAssembly().setBackLeftWheelPower(Math.abs(speed));
+                    frenzyBot.getChassisAssembly().setBackRightWheelPower(Math.abs(speed));
+                    frenzyBot.getChassisAssembly().setFrontLeftWheelPower(Math.abs(speed));
+                    frenzyBot.getChassisAssembly().setFrontRightWheelPower(Math.abs(speed));
+                }
+                while((Math.abs(frenzyBot.getChassisAssembly().getFrontLeftWheelCurrentPosition()) > Math.abs(newFrontLeftTarget/2)) && speed > 0.1)
+                {
+                    frenzyBot.getChassisAssembly().setBackLeftWheelPower(Math.abs(speed));
+                    frenzyBot.getChassisAssembly().setBackRightWheelPower(Math.abs(speed));
+                    frenzyBot.getChassisAssembly().setFrontLeftWheelPower(Math.abs(speed));
+                    frenzyBot.getChassisAssembly().setFrontRightWheelPower(Math.abs(speed));
+                    speed = speed -  0.05;
+                }
+
                 // Display it for the driver.
-                telemetry.addData("Path1", "Running to %7d :%7d : %7d :%7d",
+                telemetry.addData("Turn1", "Running to %7d :%7d : %7d :%7d",
                         newBackLeftTarget, newBackRightTarget, newFrontLeftTarget, newFrontRightTarget);
-                telemetry.addData("Path2", "Running at %7d :%7d : %7d : %7d",
+                telemetry.addData("Turn2", "Running at %7d :%7d : %7d : %7d",
                         frenzyBot.getChassisAssembly().getBackLeftWheelCurrentPosition(),
                         frenzyBot.getChassisAssembly().getBackRightWheelCurrentPosition(),
                         frenzyBot.getChassisAssembly().getFrontLeftWheelCurrentPosition(),
@@ -490,156 +512,110 @@ public class BlueLeft extends LinearOpMode
         }
     }//end of encoderTurn
 
-    public void encoderSide(double speed, double inches, double timeoutS) {
-        int newBackLeftTarget;
-        int newBackRightTarget;
-        int newFrontLeftTarget;
-        int newFrontRightTarget;
-
-        // Ensure that the opmode is still active
-        if (opModeIsActive()) {
-            newBackLeftTarget = chassis.getBackLeftWheelCurrentPosition() + (int) (inches * COUNTS_PER_SIDE_INCH);
-            newBackRightTarget = chassis.getBackRightWheelCurrentPosition() + (int) (-inches * COUNTS_PER_SIDE_INCH);
-            newFrontLeftTarget = chassis.getFrontLeftWheelCurrentPosition() + (int) (-inches * COUNTS_PER_SIDE_INCH);
-            newFrontRightTarget = chassis.getFrontRightWheelCurrentPosition() + (int) (inches * COUNTS_PER_SIDE_INCH);
-
-            chassis.setBackLeftWheelTargetPosition(newBackLeftTarget);
-            chassis.setBackRightWheelTargetPosition(newBackRightTarget);
-            chassis.setFrontLeftWheelTargetPosition(newFrontLeftTarget);
-            chassis.setFrontRightWeelTargetPosition(newFrontRightTarget);
-
-            // Turn On RUN_TO_POSITION
-            chassis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-
-            // reset the timeout time and start motion.
-            runtime.reset();
-            chassis.setBackLeftWheelPower(Math.abs(speed));
-            chassis.setBackRightWheelPower(Math.abs(speed));
-            chassis.setFrontLeftWheelPower(Math.abs(speed));
-            chassis.setFrontRightWheelPower(Math.abs(speed));
-
-
-            // keep looping while we are still active, and there is time left, and both motors are running.
-            while (opModeIsActive() &&
-                    (runtime.seconds() < timeoutS) &&
-                    (chassis.isBackLeftWheelBusy() && chassis.isBackRightWheelBusy() &&
-                            chassis.isFrontLeftWheelBusy() && chassis.isFrontRightWheelBusy())) {
-
-                // Display it for the driver.
-                telemetry.addData("Path1", "Running to %7d :%7d : %7d :%7d",
-                        newBackLeftTarget, newBackRightTarget, newFrontLeftTarget, newFrontRightTarget);
-                telemetry.addData("Path2", "Running at %7d :%7d : %7d : %7d",
-                        chassis.getBackLeftWheelCurrentPosition(),
-                        chassis.getBackRightWheelCurrentPosition(),
-                        chassis.getFrontLeftWheelCurrentPosition(),
-                        chassis.getFrontRightWheelCurrentPosition());
-                telemetry.update();
-            }
-
-            // Stop all motion;
-            chassis.stopMoving();
-
-            // Turn off RUN_TO_POSITION
-            chassis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
-
-        sleep(250);
-    }//end of encoderSide
-
-
-    public static class RingDeterminationPipeline extends OpenCvPipeline
+    public static class TeamElementDeterminationPipeline extends OpenCvPipeline
     {
 
         static Telemetry telemetry;
 
-        public RingDeterminationPipeline(Telemetry tele) {
+        public TeamElementDeterminationPipeline(Telemetry tele) {
             telemetry = tele;
         }
 
-        int numRings;
+        String location;
+
 
         @Override
-        public Mat processFrame(Mat input)
-        {
+        public Mat processFrame(Mat input) {
+            // "Mat" stands for matrix, which is basically the image that the detector will process
+            // the input matrix is the image coming from the camera
+            // the function will return a matrix to be drawn on your phone's screen
 
-            int startRow = 0;
-            int endRow = 0;
-            int startColumn = 0;
-            int endColumn = 0;
+            // The detector detects team element The camera fits area for two positions.
+            // If it finds team element in either of these locations, it can identify whether left or middle.
+            // If not team element is on right
 
-            double[] pixel;
+            // Make a working copy of the input matrix in HSV
+            Mat mat = new Mat();
+            Imgproc.cvtColor(input, mat, Imgproc.COLOR_RGB2HSV);
+
+            // if something is wrong, we assume there's no team element
+            if (mat.empty()) {
+                location = "RIGHT";
+                return input;
+            }
+
+            // We create a HSV range for yellow to detect regular stones
+            // NOTE: In OpenCV's implementation,
+            // Hue values are half the real value
+            //Scalar lowHSV = new Scalar(20, 100, 100); // lower bound HSV for yellow
+            //Scalar highHSV = new Scalar(30, 255, 255); // higher bound HSV for yellow
+
+            Scalar lowHSV = new Scalar(65, 60, 60); // lower bound HSV for green
+            Scalar highHSV = new Scalar(80, 255, 255); // higher bound HSV for green
+
+            Mat thresh = new Mat();
+
+            // We'll get a black and white image. The white regions represent the regular stones.
+            // inRange(): thresh[i][j] = {255,255,255} if mat[i][i] is within the range
+            Core.inRange(mat, lowHSV, highHSV, thresh);
+
+            // Use Canny Edge Detection to find edges
+            // you might have to tune the thresholds for hysteresis
+            Mat edges = new Mat();
+            Imgproc.Canny(thresh, edges, 100, 300);
+
+            // https://docs.opencv.org/3.4/da/d0c/tutorial_bounding_rects_circles.html
+            // Oftentimes the edges are disconnected. findContours connects these edges.
+            // We then find the bounding rectangles of those contours
+            List<MatOfPoint> contours = new ArrayList<>();
+            Mat hierarchy = new Mat();
+            Imgproc.findContours(edges, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+            MatOfPoint2f[] contoursPoly  = new MatOfPoint2f[contours.size()];
+            Rect[] boundRect = new Rect[contours.size()];
+            for (int i = 0; i < contours.size(); i++) {
+                contoursPoly[i] = new MatOfPoint2f();
+                Imgproc.approxPolyDP(new MatOfPoint2f(contours.get(i).toArray()), contoursPoly[i], 3, true);
+                boundRect[i] = Imgproc.boundingRect(new MatOfPoint(contoursPoly[i].toArray()));
+            }
+
             Size size = input.size();
             double height = size.height;
             double width = size.width;
+            // Iterate and check whether the bounding boxes
+            // cover left and/or right side of the image
+            double left_x = 0.25 * width;
+            double right_x = 0.75 * width;
+            boolean left = false; // true if team element found on the left side
+            boolean right = false; // true if found on the right side, indicates middle location
+            for (int i = 0; i != boundRect.length; i++) {
+                if (boundRect[i].x < left_x)
+                    left = true;
+                if (boundRect[i].x + boundRect[i].width > right_x)
+                    right = true;
 
-            double redValue = 0;
-            double greenValue = 0;
-            double blueValue = 0;
-            for (int i=100; i < width; i++)
-            {
-                for (int j=0; j < height; j++)
-                {
-                    pixel = input.get(i,j);
-                    if (pixel != null && pixel.length > 0)
-                    {
-                        redValue = pixel[0];
-                        greenValue = pixel[1];
-                        blueValue= pixel[2];
-                        if (redValue > 150 && greenValue > 50 && blueValue < 50) {
-                            if ( startRow <= 0)
-                                startRow = i;
-                            if (startColumn <= 0)
-                                startColumn = j;
+                // draw red bounding rectangles on mat
+                // the mat has been converted to HSV so we need to use HSV as well
+                Imgproc.rectangle(mat, boundRect[i], new Scalar(0.5, 76.9, 89.8));
 
-                            if (endRow < i)
-                                endRow = i;
-
-                            if (endColumn < j)
-                                endColumn = j;
-                        }
-                    }
-                    else
-                    {
-                        //telemetry.addData("Pixel Null at",  i );
-                        //telemetry.addData(" ",  j );
-                        //telemetry.update();
-                    }
-                }
             }
 
-            double ringWidth = endRow - startRow;
-            double ringHeight = endColumn - startColumn;
+            // if there is no yellow regions on a side
+            // that side should be blank
+            if (left) location = "LEFT";
+            else if (right) location = "MIDDLE";
+                // if both are false, then there's no teamelement in front.
+            else location ="RIGHT";
 
-            double ratio =  0;
-            if (ringHeight > 0.0)
-                ratio = ringWidth/ringHeight;
-
-
-            if (ringWidth > 20)
-                numRings = 4;
-            else if (ringWidth > 0.1 )
-                numRings = 1;
-            else
-                numRings = 0;
-
-            telemetry.addData("Start Row ",  startRow );
-            telemetry.addData("End Row ",  endRow ); //Display it on telemetry
-            telemetry.addData("Start Column ",  startColumn );
-            telemetry.addData("End Column ",  endColumn );
-            telemetry.addData("Ratio ",  ratio );
-            telemetry.addData("Width:", ringWidth);
-            telemetry.addData("Height:", ringHeight);
-            telemetry.addData("Number of Rings ",  numRings );
-            telemetry.update();
-
-            return input;
+            return mat; // return the mat with rectangles drawn
         }
-
-
-        public int getNumRings()
+        public String getFrameLocation()
         {
-            return numRings;
+
+            return location;
         }
     }
+
 }
+
+

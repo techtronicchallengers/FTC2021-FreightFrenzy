@@ -10,16 +10,16 @@ public class IntakeAssembly
         robotHardware = hardware;
     }
 
-    public void intake()
+    public void intake(double speed)
     {
-        robotHardware.intaker.setPower(-1);
+        robotHardware.intaker.setPower(speed);
     }
-    /*
+
     public void outake()
     {
-        robotHardware.intaker.setPower(-intakeSpeed);
+        robotHardware.intaker.setPower(intakeSpeed);
     }
-*/
+
     public void stopIntake()
     {
         robotHardware.intaker.setPower(0.0);

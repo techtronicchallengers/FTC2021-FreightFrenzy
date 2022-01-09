@@ -3,10 +3,6 @@ package org.firstinspires.ftc.teamcode.assembly;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 
-/**
- * Created by Athira on 10/14/2018.
- */
-
 public class BobTheDuckBot
 {
 

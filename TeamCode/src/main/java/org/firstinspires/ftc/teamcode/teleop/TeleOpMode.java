@@ -5,6 +5,7 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Func;
@@ -31,9 +32,6 @@ public class TeleOpMode extends LinearOpMode
     final double COUNTS_PER_MOTOR_REV    = 537.6;
     final double DRIVE_GEAR_REDUCTION = 1;
     final double WHEEL_DIAMETER_INCHES = 4.0;
-    final double LIFT_WHEEL_DIAMETER = 1.37795;
-    final double LIFT_COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-            (LIFT_WHEEL_DIAMETER * Math.PI);
     final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * Math.PI);
     final double COUNTS_PER_DEGREE = 9;
@@ -48,6 +46,17 @@ public class TeleOpMode extends LinearOpMode
     boolean intakePressed = false;
     boolean notPowerAng = true;
 
+    //ramp servo variable
+    double rampPos = 0.25;
+
+    //tilter servo variable
+    double tiltPos = 0.25;
+    //servo positions
+    double flipUp = 0.4;
+    double flipDown = 0.2;
+    double rampUp = 0.45;
+
+    double liftPosition = 0;
 
     //Creating a Rover robot object
     BobTheDuckBot frenzyBot = new BobTheDuckBot();
@@ -59,17 +68,16 @@ public class TeleOpMode extends LinearOpMode
         frenzyBot.initRobot(hardwareMap);
 
 
-
         //Gyro Setup/Initialization
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
         // provide positional information.
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "imuCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag          = "IMU";
+        parameters.loggingEnabled = true;
+        parameters.loggingTag = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
@@ -78,56 +86,189 @@ public class TeleOpMode extends LinearOpMode
         frenzyBot.getRobotHardware().imu.initialize(parameters);
 
         // Set up our telemetry dashboard
-        composeTelemetry();
-        telemetry.update();
+        //composeTelemetry();
+
 
         while (!opModeIsActive() && !isStopRequested()) {
             telemetry.addData("status", "waiting for start command...");
             telemetry.update();
         }
-        while (opModeIsActive())
-        {
+        frenzyBot.getRobotHardware().rampServo.setPosition(rampUp);
+        frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
+        while (opModeIsActive()) {
+
+            liftPosition = frenzyBot.getRobotHardware().lift.getCurrentPosition();
+
             double drive = gamepad1.left_stick_y;
             double turn = gamepad1.left_stick_x;
-
+            double slowDrive = gamepad1.right_stick_y;
+            double slowTurn = gamepad1.right_stick_x;
+            double slowSpeed = 0.25;
+            telemetry.addData("Motor power: ", frenzyBot.getRobotHardware().lift.getPower());
+            telemetry.addData("Spool position: ", liftPosition);
+            telemetry.update();
             //Movement
-            /*
-            if (drive < 0) {
-                frenzyBot.getChassisAssembly().moveForward(Math.abs(drive));
+
+            if(Math.abs(drive) > 0.15 || Math.abs(turn) > 0.15) {
+
+                if (drive < 0) {
+                    frenzyBot.getChassisAssembly().moveForward(Math.abs(drive));
+                } else if (drive > 0) {
+                    frenzyBot.getChassisAssembly().moveBackwards(Math.abs(drive));
+                }
+                //turn right
+                else if (turn > 0) {
+                    frenzyBot.getChassisAssembly().turnRight(Math.abs(turn));
+                }
+                //turn left
+                else if (turn < 0) {
+                    frenzyBot.getChassisAssembly().turnLeft(Math.abs(turn));
+                }
             }
-            else if (drive > 0){
-                frenzyBot.getChassisAssembly().moveBackwards(Math.abs(drive));
+
+            //slow mode
+            else if(Math.abs(slowDrive) > 0.15 || Math.abs(slowTurn) > 0.15) {
+                if (slowDrive < 0) {
+                    frenzyBot.getChassisAssembly().moveForward(Math.abs(slowSpeed * slowDrive));
+                } else if (slowDrive > 0) {
+                    frenzyBot.getChassisAssembly().moveBackwards(Math.abs(slowSpeed * slowDrive));
+                }
+                //turn right
+                else if (slowTurn > 0) {
+                    frenzyBot.getChassisAssembly().turnRight(Math.abs(slowSpeed * slowTurn));
+                }
+                //turn left
+                else if (slowTurn < 0) {
+                    frenzyBot.getChassisAssembly().turnLeft(Math.abs(slowSpeed * slowTurn));
+                }
             }
-            //turn right
-            else if (turn > 0) {
-                frenzyBot.getChassisAssembly().turnRight(Math.abs(turn));
-            }
-            //turn left
-            else if (turn < 0) {
-                frenzyBot.getChassisAssembly().turnLeft(Math.abs(turn));
-            }
-            else{
+
+            else {
                 frenzyBot.getChassisAssembly().moveForward(0);
-
             }
 
-
-             */
-            if(gamepad1.x == true){
-
-                frenzyBot.getIntakeAssembly().intake();
-            }
-            else{
+            //intake
+            if (gamepad1.left_trigger > 0.1) {
+                frenzyBot.getRobotHardware().intaker.setDirection(DcMotorSimple.Direction.REVERSE);
+                sleep(100);
+                frenzyBot.getIntakeAssembly().intake(1.0);
+            } else if (gamepad1.right_trigger > 0.1) {
+                frenzyBot.getRobotHardware().intaker.setDirection(DcMotorSimple.Direction.FORWARD);
+                sleep(100);
+                frenzyBot.getIntakeAssembly().intake(1.0);
+            } else {
                 frenzyBot.getIntakeAssembly().stopIntake();
             }
-            frenzyBot.getChassisAssembly().forwardTurn(-gamepad1.left_stick_y, gamepad1.left_stick_x);
 
+            //flipper
+            if (gamepad1.y) {
+                frenzyBot.getRobotHardware().intakeBox.setPosition(flipDown);
+                sleep(300);
+                frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
+            }
+
+            //carousel
+            if (gamepad1.x) {
+                frenzyBot.getRobotHardware().carouselServo.setPower(-1);
+            } else if (gamepad1.b) {
+                frenzyBot.getRobotHardware().carouselServo.setPower(1);
+            } else {
+                frenzyBot.getRobotHardware().carouselServo.setPower(0);
+            }
+
+            //lift
+            if (gamepad1.left_bumper) {
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                while(!frenzyBot.getRobotHardware().liftLimit.isPressed()){
+                frenzyBot.getRobotHardware().lift.setPower(0.5);
+                }
+            }
+
+            else if (gamepad1.dpad_down) {
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(-810);
+
+                frenzyBot.getRobotHardware().intaker.setDirection(DcMotorSimple.Direction.REVERSE);
+                sleep(100);
+                frenzyBot.getIntakeAssembly().intake(0.4);
+
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                frenzyBot.getRobotHardware().lift.setPower(-0.5);
+                sleep(1500);
+                frenzyBot.getRobotHardware().intakeBox.setPosition(flipDown);
+                sleep(300);
+                frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
+
+                frenzyBot.getIntakeAssembly().stopIntake();
+
+                sleep(400);
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                while(!frenzyBot.getRobotHardware().liftLimit.isPressed()){
+                    frenzyBot.getRobotHardware().lift.setPower(0.5);
+                }
+                frenzyBot.getRobotHardware().lift.setPower(0);
+            }
+
+            else if (gamepad1.dpad_up) {
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(-1425);
+
+                frenzyBot.getRobotHardware().intaker.setDirection(DcMotorSimple.Direction.REVERSE);
+                sleep(100);
+                frenzyBot.getIntakeAssembly().intake(0.4);
+
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                frenzyBot.getRobotHardware().lift.setPower(-0.5);
+                sleep(1500);
+                frenzyBot.getRobotHardware().intakeBox.setPosition(flipDown);
+                sleep(300);
+                frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
+
+                frenzyBot.getIntakeAssembly().stopIntake();
+
+                sleep(400);
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                while(!frenzyBot.getRobotHardware().liftLimit.isPressed()){
+                    frenzyBot.getRobotHardware().lift.setPower(0.5);
+                }
+                frenzyBot.getRobotHardware().lift.setPower(0);
+            }
+
+            else if (gamepad1.dpad_right) {
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(-1100);
+
+                frenzyBot.getRobotHardware().intaker.setDirection(DcMotorSimple.Direction.REVERSE);
+                sleep(100);
+                frenzyBot.getIntakeAssembly().intake(0.4);
+
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                frenzyBot.getRobotHardware().lift.setPower(-0.5);
+                sleep(1500);
+                frenzyBot.getRobotHardware().intakeBox.setPosition(flipDown);
+                sleep(300);
+                frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
+
+                frenzyBot.getIntakeAssembly().stopIntake();
+
+                sleep(400);
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                while(!frenzyBot.getRobotHardware().liftLimit.isPressed()){
+                    frenzyBot.getRobotHardware().lift.setPower(0.5);
+                }
+                frenzyBot.getRobotHardware().lift.setPower(0);
+            }
+
+            else{
+                frenzyBot.getRobotHardware().lift.setPower(0);
+            }
 
         }
 
     }
 
 
+    /*
     public void turnToAngle(double speed, double desiredAngle, int numLoops)
     {
         double currentAngle = angles.firstAngle;
@@ -156,18 +297,17 @@ public class TeleOpMode extends LinearOpMode
 
             encoderTurn(speed, angleToTurn, 5);
         }
-
-        telemetry.addData("current angle", currentAngle);
-        telemetry.addData("desired angle", desiredAngle);
-        telemetry.update();
     }
+*/
+/*
 
     /**
      *ENCODER DRIVE METHOD
      * @param speed (at which the robot should move)
      * @param inches (positive is forward, negative is backwards)
      * @param timeoutS (the robot will stop moving if it after this many seconds)
-     */
+
+
     public void encoderDrive(double speed, double inches, double timeoutS)
     {
         double setSpeed = speed;
@@ -241,15 +381,7 @@ public class TeleOpMode extends LinearOpMode
                     speed = speed -  0.01;
                 }
 
-                // Display it for the driver.
-                telemetry.addData("Path1",  "Running to %7d :%7d : %7d :%7d",
-                        newBackLeftTarget,  newBackRightTarget, newFrontLeftTarget, newFrontRightTarget);
-                telemetry.addData("Path2",  "Running at %7d :%7d : %7d : %7d",
-                        frenzyBot.getChassisAssembly().getBackLeftWheelCurrentPosition(),
-                        frenzyBot.getChassisAssembly().getBackRightWheelCurrentPosition(),
-                        frenzyBot.getChassisAssembly().getFrontLeftWheelCurrentPosition(),
-                        frenzyBot.getChassisAssembly().getFrontRightWheelCurrentPosition());
-                telemetry.update();
+                // Display it for the driver
             }
 
             // Stop all motion;
@@ -296,15 +428,7 @@ public class TeleOpMode extends LinearOpMode
                     (frenzyBot.getChassisAssembly().isBackLeftWheelBusy() && frenzyBot.getChassisAssembly().isBackRightWheelBusy() &&
                             frenzyBot.getChassisAssembly().isFrontLeftWheelBusy() && frenzyBot.getChassisAssembly().isFrontRightWheelBusy())) {
 
-                // Display it for the driver.
-                telemetry.addData("Path1", "Running to %7d :%7d : %7d :%7d",
-                        newBackLeftTarget, newBackRightTarget, newFrontLeftTarget, newFrontRightTarget);
-                telemetry.addData("Path2", "Running at %7d :%7d : %7d : %7d",
-                        frenzyBot.getChassisAssembly().getBackLeftWheelCurrentPosition(),
-                        frenzyBot.getChassisAssembly().getBackRightWheelCurrentPosition(),
-                        frenzyBot.getChassisAssembly().getFrontLeftWheelCurrentPosition(),
-                        frenzyBot.getChassisAssembly().getFrontRightWheelCurrentPosition());
-                //telemetry.update();
+
             }
 
             // Stop all motion;
@@ -314,75 +438,7 @@ public class TeleOpMode extends LinearOpMode
             frenzyBot.getChassisAssembly().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
     }//end of encoderTurn
-
-    public void encoderLiftDrive(double speed, double inches, double timeoutS)
-{
-    double setSpeed = speed;
-    int newLiftTarget;
-
-    // Ensure that the opmode is still active
-    if (opModeIsActive()) {
-
-        frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        // Determine new target position, and pass to motor controller
-        newLiftTarget = frenzyBot.getRobotHardware().lift.getCurrentPosition() + (int)(inches * LIFT_COUNTS_PER_INCH);
-
-        frenzyBot.getRobotHardware().lift.setTargetPosition(newLiftTarget);
-
-        // Turn On RUN_TO_POSITION
-        frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-
-        // reset the timeout time and start motion.
-        runtime.reset();
-
-        speed = 0.1;
-        // keep looping while we are still active, and there is time left, and both motors are running.
-        while (opModeIsActive() &&
-                (runtime.seconds() < timeoutS) &&
-                (frenzyBot.getRobotHardware().lift.isBusy())) {
-
-            while((Math.abs(frenzyBot.getRobotHardware().lift.getCurrentPosition()) < Math.abs(newLiftTarget)
-                    && Math.abs(speed) < Math.abs(setSpeed)))
-            {
-                frenzyBot.getRobotHardware().lift.setPower(Math.abs(speed));
-                speed = speed + 0.005;
-            }
-
-            // Display it for the driver.
-            telemetry.addData("Path1",  "Running to %7d",
-                    newLiftTarget);
-            telemetry.addData("Path2",  "Running at %7d",
-                    frenzyBot.getChassisAssembly().getBackLeftWheelCurrentPosition(), frenzyBot.getRobotHardware().lift.getCurrentPosition());
-            telemetry.update();
-        }
-
-        // Stop all motion;
-        frenzyBot.getRobotHardware().lift.setPower(0);
-
-        // Turn off RUN_TO_POSITION
-        frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-}//end of liftEncoderDrive
-
-    public void lift(int level) {
-        if(level == 1) {
-            encoderLiftDrive(0.1,2, 5);
-
-        }
-        else if(level == 2) {
-            encoderLiftDrive(0.1,4, 5);
-        }
-        else if(level == 3) {
-            encoderLiftDrive(0.1,6,5);
-        }
-    }
-    public void resetLift(){
-    }
-
-
+*/
     String formatAngle(AngleUnit angleUnit, double angle) {
         return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
     }
@@ -391,19 +447,11 @@ public class TeleOpMode extends LinearOpMode
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
 
-    void composeTelemetry() {
+    /*void composeTelemetry() {
 
         // At the beginning of each telemetry update, grab a bunch of data
         // from the IMU that we will then display in separate lines.
-        telemetry.addAction(new Runnable() { @Override public void run()
-        {
-            // Acquiring the angles is relatively expensive; we don't want
-            // to do that in each of the three items that need that info, as that's
-            // three times the necessary expense.
-            angles   = frenzyBot.getRobotHardware().imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            gravity  = frenzyBot.getRobotHardware().imu.getGravity();
-        }
-        });
+
 
         telemetry.addLine()
                 .addData("status", new Func<String>() {
@@ -450,8 +498,12 @@ public class TeleOpMode extends LinearOpMode
                 });
     }
 
-    void readAngle()
+     */
+
+    /*void readAngle()
     {
         angles   = frenzyBot.getRobotHardware().imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
+    */
+
 }

@@ -26,34 +26,40 @@ import org.opencv.imgproc.Imgproc;
 
 public class DeliverAssembly
 {
-    //final public double shootingSpeed = 1.0;
     public RobotHardware robotHardware;
 
     public DeliverAssembly(RobotHardware hardware)
     {
         robotHardware = hardware;
     }
-/*
-    public void lift(int level) {
-        //robotHardware.lift;
-        //DcMotorSimple.Direction.FORWARD
-    }
-    public void rampUp() {
-        robotHardware.rampServo.setPosition(BotConstants.RAMP_UP_POSITION);
-    }
-    public void rampDown() {
-        robotHardware.rampServo.setPosition(BotConstants.RAMP_DOWN_POSITION);
-    }
-    public void dropElement() {
-        //lift to level
-        robotHardware.intakeBox.setPosition(BotConstants.DROP_POSITION);
-        try {
-            Thread.sleep(BotConstants.DROP_ELEMENT_SLEEP);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+
+    public void moveLift(int target, double speed) {
+
+        double setSpeed = speed;
+
+        while((Math.abs(robotHardware.lift.getCurrentPosition()) < Math.abs(target/4)
+                && Math.abs(speed) < Math.abs(setSpeed)))
+        {
+            robotHardware.lift.setPower(Math.abs(speed));
+            speed += 0.005;
         }
-        robotHardware.intakeBox.setPosition(BotConstants.UP_POSITION);
-        lift(0);
+        while((Math.abs(speed) < Math.abs(setSpeed))
+                && Math.abs(robotHardware.lift.getCurrentPosition()) < Math.abs(target/2))
+        {
+            robotHardware.lift.setPower(Math.abs(speed));
+            speed += 0.005;
+        }
+        while(Math.abs(robotHardware.lift.getCurrentPosition()) < Math.abs(target/2))
+        {
+            robotHardware.lift.setPower(Math.abs(speed));
+        }
+        while((Math.abs(robotHardware.lift.getCurrentPosition()) > Math.abs(target/2)) && speed > setSpeed)
+        {
+            robotHardware.lift.setPower(Math.abs(speed));
+            speed -= 0.01;
+        }
+
+        robotHardware.lift.setPower(0);
+
     }
-*/
 }

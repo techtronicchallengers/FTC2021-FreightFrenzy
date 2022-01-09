@@ -26,6 +26,7 @@ public class TestDistanceSensors extends LinearOpMode
 
         while (opModeIsActive())
         {
+            /*
             telemetry.addData("Front Right", bobTheDuckBot.getNavigation().frontRightDistance());
             telemetry.addData("Back Right", bobTheDuckBot.getNavigation().backRightDistance());
             telemetry.addData("Front Left", bobTheDuckBot.getNavigation().frontLeftDistance());
@@ -37,6 +38,7 @@ public class TestDistanceSensors extends LinearOpMode
             telemetry.addData("Right Angle", bobTheDuckBot.getNavigation().rightAngle());
             telemetry.addData("Left Angle", bobTheDuckBot.getNavigation().leftAngle());
             telemetry.update();
+             */
         }
     }
 }

@@ -27,8 +27,10 @@ public class TestLaserSensors extends LinearOpMode
 
         while (opModeIsActive())
         {
+            /*
             telemetry.addData("Front Laser", utlimateBot.getNavigation().frontDistance());
             telemetry.addData("Back Laser", utlimateBot.getNavigation().backDistance());
+             */
             telemetry.update();
         }
     }
