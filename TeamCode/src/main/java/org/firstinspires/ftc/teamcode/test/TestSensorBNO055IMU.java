@@ -151,7 +151,6 @@ public class TestSensorBNO055IMU extends LinearOpMode
                 encoderTurn(1, angleToTurn, 3);
             }
             else if (gamepad1.x) {
-                ultimateBot.getChassisAssembly().turnRight(0.4);
                 double currentAngle = -(angles.firstAngle);
                 telemetry.addData("Current Angle ", currentAngle);
                 telemetry.update();

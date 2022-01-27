@@ -147,11 +147,7 @@ public class RedDuck extends LinearOpMode
 
         encoderDrive(1, 5, 7);
 
-        frenzyBot.getRobotHardware().carouselServo.setPower(-1);
-
         sleep(3000);
-
-        frenzyBot.getRobotHardware().carouselServo.setPower(0);
 
         rampSpeedEncoderDrive(1, -20, 7);
 

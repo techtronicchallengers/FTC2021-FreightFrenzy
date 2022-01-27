@@ -62,7 +62,7 @@ public class ChassisAssembly
      * wheels negative power
      * @param speed at which the wheel motors will turn
      */
-    public void turnRight (double speed)
+    public void turn (double speed)
     {
         robotHardware.frontLeftWheel.setPower(speed);
         robotHardware.backLeftWheel.setPower(speed);
@@ -81,6 +81,10 @@ public class ChassisAssembly
         robotHardware.backLeftWheel.setPower(-speed);
         robotHardware.frontRightWheel.setPower(speed);
         robotHardware.backRightWheel.setPower(speed);
+    }
+
+    public double averagePosition(){
+        return(robotHardware.frontLeftWheel.getCurrentPosition() + robotHardware.backLeftWheel.getCurrentPosition() + robotHardware.frontRightWheel.getCurrentPosition() + robotHardware.backRightWheel.getCurrentPosition())/4;
     }
 
     /**
@@ -150,6 +154,12 @@ public class ChassisAssembly
         robotHardware.backRightWheel.setPower(0);
     }
 
+    public void setPower(double backRight, double frontRight, double backLeft, double frontLeft){
+        robotHardware.backRightWheel.setPower(backRight);
+        robotHardware.frontRightWheel.setPower(frontRight);
+        robotHardware.backLeftWheel.setPower(backLeft);
+        robotHardware.frontLeftWheel.setPower(frontLeft);
+    }
 
 
     /**

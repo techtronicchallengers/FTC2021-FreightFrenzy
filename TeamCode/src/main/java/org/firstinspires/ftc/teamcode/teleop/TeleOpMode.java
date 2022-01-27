@@ -8,12 +8,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.assembly.BobTheDuckBot;
 
@@ -52,9 +48,11 @@ public class TeleOpMode extends LinearOpMode
     //tilter servo variable
     double tiltPos = 0.25;
     //servo positions
-    double flipUp = 0.4;
-    double flipDown = 0.2;
+    double flipUp = 0.7;
+    double flipDown = 0.325;
     double rampUp = 0.45;
+    double carouselSpeed = 0;
+    double tsePos = 0;
 
     double liftPosition = 0;
 
@@ -88,64 +86,38 @@ public class TeleOpMode extends LinearOpMode
         // Set up our telemetry dashboard
         //composeTelemetry();
 
+        frenzyBot.getRobotHardware().frontRightWheel.setDirection(DcMotorSimple.Direction.REVERSE);
+        frenzyBot.getRobotHardware().backRightWheel.setDirection(DcMotorSimple.Direction.REVERSE);
 
         while (!opModeIsActive() && !isStopRequested()) {
             telemetry.addData("status", "waiting for start command...");
             telemetry.update();
+            frenzyBot.getRobotHardware().rampServo.setPosition(rampUp);
+            frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
+
+
         }
-        frenzyBot.getRobotHardware().rampServo.setPosition(rampUp);
-        frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
         while (opModeIsActive()) {
+
+            frenzyBot.getRobotHardware().rampServo.setPosition(rampUp);
 
             liftPosition = frenzyBot.getRobotHardware().lift.getCurrentPosition();
 
-            double drive = gamepad1.left_stick_y;
-            double turn = gamepad1.left_stick_x;
-            double slowDrive = gamepad1.right_stick_y;
-            double slowTurn = gamepad1.right_stick_x;
-            double slowSpeed = 0.25;
-            telemetry.addData("Motor power: ", frenzyBot.getRobotHardware().lift.getPower());
-            telemetry.addData("Spool position: ", liftPosition);
+            double y = -gamepad1.left_stick_y;
+            double x = gamepad1.left_stick_x;
+            double turn = gamepad1.right_stick_x;
+            double normalizer = Math.max(Math.abs(x)+Math.abs(y)+Math.abs(turn), 1);
+
+            telemetry.addData("Motor speed: ", carouselSpeed);
+            telemetry.addData("Servo set position: ", tsePos);
+            telemetry.addData("Servo position: ", frenzyBot.getRobotHardware().intakeBox.getPosition());
             telemetry.update();
+
             //Movement
-
-            if(Math.abs(drive) > 0.15 || Math.abs(turn) > 0.15) {
-
-                if (drive < 0) {
-                    frenzyBot.getChassisAssembly().moveForward(Math.abs(drive));
-                } else if (drive > 0) {
-                    frenzyBot.getChassisAssembly().moveBackwards(Math.abs(drive));
-                }
-                //turn right
-                else if (turn > 0) {
-                    frenzyBot.getChassisAssembly().turnRight(Math.abs(turn));
-                }
-                //turn left
-                else if (turn < 0) {
-                    frenzyBot.getChassisAssembly().turnLeft(Math.abs(turn));
-                }
-            }
-
-            //slow mode
-            else if(Math.abs(slowDrive) > 0.15 || Math.abs(slowTurn) > 0.15) {
-                if (slowDrive < 0) {
-                    frenzyBot.getChassisAssembly().moveForward(Math.abs(slowSpeed * slowDrive));
-                } else if (slowDrive > 0) {
-                    frenzyBot.getChassisAssembly().moveBackwards(Math.abs(slowSpeed * slowDrive));
-                }
-                //turn right
-                else if (slowTurn > 0) {
-                    frenzyBot.getChassisAssembly().turnRight(Math.abs(slowSpeed * slowTurn));
-                }
-                //turn left
-                else if (slowTurn < 0) {
-                    frenzyBot.getChassisAssembly().turnLeft(Math.abs(slowSpeed * slowTurn));
-                }
-            }
-
-            else {
-                frenzyBot.getChassisAssembly().moveForward(0);
-            }
+            frenzyBot.getRobotHardware().frontRightWheel.setPower((y-x-turn)/normalizer);
+            frenzyBot.getRobotHardware().backRightWheel.setPower((y+x-turn)/normalizer);
+            frenzyBot.getRobotHardware().frontLeftWheel.setPower((y+x+turn)/normalizer);
+            frenzyBot.getRobotHardware().backLeftWheel.setPower((y-x+turn)/normalizer);
 
             //intake
             if (gamepad1.left_trigger > 0.1) {
@@ -168,20 +140,48 @@ public class TeleOpMode extends LinearOpMode
             }
 
             //carousel
-            if (gamepad1.x) {
-                frenzyBot.getRobotHardware().carouselServo.setPower(-1);
-            } else if (gamepad1.b) {
-                frenzyBot.getRobotHardware().carouselServo.setPower(1);
-            } else {
-                frenzyBot.getRobotHardware().carouselServo.setPower(0);
+            if(gamepad2.a){
+                carouselSpeed += 100;
+                sleep(300);
+            }
+
+            else if(gamepad2.b){
+                carouselSpeed -= 100;
+                sleep(300);
+            }
+
+            if(gamepad2.x){
+                frenzyBot.getRobotHardware().carouselMotor.setVelocity(carouselSpeed);
+                sleep(300);
+            }
+
+            else if (gamepad2.y){
+                frenzyBot.getRobotHardware().carouselMotor.setVelocity(0);
+            }
+
+            //tse
+            if(gamepad2.dpad_up){
+                tsePos += 0.05;
+                sleep(300);
+            }
+
+            if(gamepad2.dpad_down){
+                tsePos -= 0.05;
+                sleep(300);
+            }
+
+            if(gamepad2.dpad_right){
+                frenzyBot.getRobotHardware().intakeBox.setPosition(tsePos);
+                sleep(300);
             }
 
             //lift
             if (gamepad1.left_bumper) {
-                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                while(!frenzyBot.getRobotHardware().liftLimit.isPressed()){
                 frenzyBot.getRobotHardware().lift.setPower(0.5);
                 }
+
+            else if (gamepad1.right_bumper){
+                frenzyBot.getRobotHardware().lift.setPower(-0.5);
             }
 
             else if (gamepad1.dpad_down) {
@@ -210,7 +210,7 @@ public class TeleOpMode extends LinearOpMode
             }
 
             else if (gamepad1.dpad_up) {
-                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    /*            frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 frenzyBot.getRobotHardware().lift.setTargetPosition(-1425);
 
                 frenzyBot.getRobotHardware().intaker.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -220,9 +220,12 @@ public class TeleOpMode extends LinearOpMode
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 frenzyBot.getRobotHardware().lift.setPower(-0.5);
                 sleep(1500);
+      */
                 frenzyBot.getRobotHardware().intakeBox.setPosition(flipDown);
-                sleep(300);
+                sleep(1000);
                 frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
+/*
+                sleep(2000);
 
                 frenzyBot.getIntakeAssembly().stopIntake();
 
@@ -232,6 +235,7 @@ public class TeleOpMode extends LinearOpMode
                     frenzyBot.getRobotHardware().lift.setPower(0.5);
                 }
                 frenzyBot.getRobotHardware().lift.setPower(0);
+  */
             }
 
             else if (gamepad1.dpad_right) {

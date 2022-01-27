@@ -22,29 +22,27 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 public class RobotHardware
 {
     //Chassis
-    public DcMotor frontLeftWheel = null;
-    public DcMotor frontRightWheel = null;
-    public DcMotor backLeftWheel = null;
-    public DcMotor backRightWheel = null;
+    public DcMotorEx frontLeftWheel = null;
+    public DcMotorEx frontRightWheel = null;
+    public DcMotorEx backLeftWheel = null;
+    public DcMotorEx backRightWheel = null;
 
-    public DcMotor intaker = null;
-    public DcMotor lift = null;
-    //public DcMotor shooter = null;
-    //public DcMotor arm = null;
+    public DcMotorEx intaker = null;
+    public DcMotorEx lift = null;
+
+    public DcMotorEx carouselMotor = null;
 
     public Servo intakeBox = null;
-    public CRServo carouselServo = null;
     public Servo rampServo = null;
-    //public Servo gripper = null;
-    //public Servo door = null;
-    //public Servo guard = null;
+    public Servo tseServo = null;
 
     public TouchSensor liftLimit = null;
 
     //Webcam
     public WebcamName webcam = null;
 
-    public BNO055IMU imu;
+    public BNO055IMU imu = null;
+    public BNO055IMU imu2 = null;
 
     //Distance Sensors
     //Rev2mDistanceSensor frontRightSensor = null;
@@ -74,13 +72,14 @@ public class RobotHardware
         hwMap = ahwMap;
         webcam = hwMap.get(WebcamName.class, "webcam");
         imu = hwMap.get(BNO055IMU.class, "imu");
+        imu2 = hwMap.get(BNO055IMU.class, "imu2");
        // wheelServo = hwMap.get(CRServo.class, "wheelServo");
 
         //Wheel motors
-        frontLeftWheel = hwMap.get(DcMotor.class, "frontLeft");
-        frontRightWheel = hwMap.get(DcMotor.class, "frontRight");
-        backLeftWheel = hwMap.get(DcMotor.class, "backLeft");
-        backRightWheel = hwMap.get(DcMotor.class, "backRight");
+        frontLeftWheel = hwMap.get(DcMotorEx.class, "frontLeft");
+        frontRightWheel = hwMap.get(DcMotorEx.class, "frontRight");
+        backLeftWheel = hwMap.get(DcMotorEx.class, "backLeft");
+        backRightWheel = hwMap.get(DcMotorEx.class, "backRight");
 
         frontRightWheel.setDirection(DcMotor.Direction.REVERSE);
         backRightWheel.setDirection(DcMotor.Direction.REVERSE);
@@ -92,58 +91,25 @@ public class RobotHardware
         frontRightWheel.setZeroPowerBehavior((DcMotor.ZeroPowerBehavior.BRAKE));
         backRightWheel.setZeroPowerBehavior((DcMotor.ZeroPowerBehavior.BRAKE));
 
-        intaker = hwMap.get(DcMotor.class, "intaker");
+        intaker = hwMap.get(DcMotorEx.class, "intaker");
         intaker.setZeroPowerBehavior((DcMotor.ZeroPowerBehavior.FLOAT));
 
-        lift = hwMap.get(DcMotor.class, "lift");
+        lift = hwMap.get(DcMotorEx.class, "lift");
         lift.setDirection(DcMotor.Direction.FORWARD);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lift.setZeroPowerBehavior((DcMotor.ZeroPowerBehavior.BRAKE));
 
-        /*
-        shooter = hwMap.get(DcMotor.class, "shooter");
-        shooter.setDirection(DcMotor.Direction.FORWARD);
-        shooter.setZeroPowerBehavior((DcMotor.ZeroPowerBehavior.FLOAT));
-
-        arm = hwMap.get(DcMotor.class, "arm");
-        arm.setDirection(DcMotor.Direction.FORWARD);
-        arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        */
+        carouselMotor = hwMap.get(DcMotorEx.class, "carouselMotor");
+        carouselMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        carouselMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        carouselMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         intakeBox = hwMap.get(Servo.class, "intakeBox");
-        carouselServo = hwMap.get(CRServo.class, "carouselServo");
         rampServo = hwMap.get(Servo.class, "rampServo");
+        tseServo = hwMap.get(Servo.class, "tseServo");
+
 
         liftLimit = hwMap.get(TouchSensor.class, "liftLimit");
-
-        /*
-        gripper = hwMap.get(Servo.class, "gripper");
-        door = hwMap.get(Servo.class, "door");
-        guard = hwMap.get(Servo.class, "guard");
-
-        */
-      // liftTouchSensor = hwMap.get(TouchSensor.class, "liftTouchSensor");
-        /*
-        topTouch = hwMap.get(TouchSensor.class, "topTouch");
-        armReturn = hwMap.get(TouchSensor.class, "armReturn");
-        grabTouch = hwMap.get(TouchSensor.class, "grabTouch");
-
-
-        rightFrontSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "rightFrontSensor");
-        rightBackSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "rightBackSensor");
-        backSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "backSensor");
-
-
-        frontRightSensor = hwMap.get(Rev2mDistanceSensor.class, "frontRightSensor");
-        backRightSensor = hwMap.get(Rev2mDistanceSensor.class, "backRightSensor");
-
-        frontLeftSensor = hwMap.get(Rev2mDistanceSensor.class, "frontLeftSensor");
-        backLeftSensor = hwMap.get(Rev2mDistanceSensor.class, "backLeftSensor");
-
-        backLaser = hwMap.get(Rev2mDistanceSensor.class, "backSensor");
-        frontLaser = hwMap.get(Rev2mDistanceSensor.class, "frontSensor");
-*/
-
 
 
 
