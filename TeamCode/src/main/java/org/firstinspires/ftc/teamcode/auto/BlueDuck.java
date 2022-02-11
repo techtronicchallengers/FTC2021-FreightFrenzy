@@ -24,13 +24,20 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -56,56 +63,245 @@ public class BlueDuck extends LinearOpMode
     Orientation angles;
     Acceleration gravity;
 
-    double flipUp = 0.4;
-    double flipDown = 0.2;
+    double flipUp = 0.78;
+    double flipDown = 0.15;
     double rampUp = 0.45;
+
+    OpenCvCamera webCam;
+    TeamElementDeterminationPipeline pipeline;
 
     @Override public void runOpMode()
     {
+
         frenzyBot.initRobot(hardwareMap);
-        //nav = frenzyBot.getNavigation();
-        chassis = frenzyBot.getChassisAssembly();
 
-        //Wait for Start
-        telemetry.addData("Waiting for start", "");
-        waitForStart();
+        int cameraMonitorViewId = frenzyBot.getRobotHardware().getHwMap().appContext.getResources().getIdentifier("cameraMonitorViewId", "id", frenzyBot.getRobotHardware().getHwMap().appContext.getPackageName());
+        webCam = OpenCvCameraFactory.getInstance().createWebcam(frenzyBot.getRobotHardware().getHwMap().get(WebcamName.class, "webcam"), cameraMonitorViewId);
+        pipeline = new TeamElementDeterminationPipeline(telemetry);
+        webCam.setPipeline(pipeline);
 
-        encoderTurn(1.0, 90, 5);
-        /*
-        rampSpeedEncoderDrive(1.0, 25, 7);
-        encoderDrive(1, 2, 7);
-        frenzyBot.getRobotHardware().rampServo.setPosition(rampUp);
-        frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
-        encoderTurn(1.0, -120, 7);
-        rampSpeedEncoderDrive(1, -10, 7);
-        frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frenzyBot.getRobotHardware().lift.setTargetPosition(-1425);
+        webCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                webCam.startStreaming(320,240, OpenCvCameraRotation.UPSIDE_DOWN);
+            }
 
-        frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frenzyBot.getRobotHardware().lift.setPower(-0.5);
-        sleep(1500);
-        frenzyBot.getRobotHardware().intakeBox.setPosition(flipDown);
-        sleep(300);
-        frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
+            @Override
+            public void onError(int errorCode) {
 
-        sleep(400);
-        frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        while(!frenzyBot.getRobotHardware().liftLimit.isPressed()){
-            frenzyBot.getRobotHardware().lift.setPower(0.5);
+            }
+        });
+
+        while (!opModeIsActive() && !isStopRequested()) {
+            telemetry.addData("Location:", pipeline.getTSELocation());
+            telemetry.addData("Area", pipeline.getTSEArea());
+            telemetry.addData("Y:", pipeline.getTSEY());
+            telemetry.addData("Waiting for start...", "");
+            telemetry.update();
+            sleep(5);
         }
-        frenzyBot.getRobotHardware().lift.setPower(0);
 
-        rampSpeedEncoderDrive(1, 45, 7);
+        while(opModeIsActive()){
 
-        sleep(3000);
+            String position = pipeline.getTSELocation();
+            telemetry.addData("Location: ", position);
 
-                encoderDrive(1, -1, 7);
+            frenzyBot.getRobotHardware().rampServo.setPosition(rampUp);
+            frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
 
-        encoderTurn(1, -70, 7);
+            sleep(1000);
 
-        rampSpeedEncoderDrive(1, -18, 7);
-*/
+            rampSpeedEncoderDrive(0.7, -17, 7);
+
+            sleep(300);
+
+            encoderTurn(0.7, 55, 7);
+
+            rampSpeedEncoderDrive(0.7,-22.5,7);
+
+            if(position.equals("LEFT")){
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(-790);
+
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                frenzyBot.getRobotHardware().lift.setPower(-0.5);
+                sleep(1500);
+                frenzyBot.getRobotHardware().intakeBox.setPosition(flipDown);
+                sleep(700);
+                frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
+                sleep(2000);
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                while(!frenzyBot.getRobotHardware().liftLimit.isPressed()){
+                    frenzyBot.getRobotHardware().lift.setPower(0.5);
+                }
+                frenzyBot.getRobotHardware().lift.setPower(0);
+            }
+
+            else if(position.equals("MIDDLE")){
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(-1085);
+
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                frenzyBot.getRobotHardware().lift.setPower(-0.5);
+                sleep(1500);
+
+                frenzyBot.getRobotHardware().intakeBox.setPosition(flipDown);
+                sleep(700);
+                frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
+
+                sleep(400);
+
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                while(!frenzyBot.getRobotHardware().liftLimit.isPressed()){
+                    frenzyBot.getRobotHardware().lift.setPower(0.5);
+                }
+                frenzyBot.getRobotHardware().lift.setPower(0);
+            }
+
+            else if(position.equals("RIGHT")){
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(-1590);
+
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                frenzyBot.getRobotHardware().lift.setPower(-0.5);
+                sleep(1500);
+                frenzyBot.getRobotHardware().intakeBox.setPosition(flipDown);
+                sleep(700);
+                frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
+
+                sleep(400);
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                while(!frenzyBot.getRobotHardware().liftLimit.isPressed()){
+                    frenzyBot.getRobotHardware().lift.setPower(0.5);
+                }
+                frenzyBot.getRobotHardware().lift.setPower(0);
+            }
+
+            rampSpeedEncoderDrive(0.7, 42, 7);
+
+            ElapsedTime timer = new ElapsedTime();
+
+            while(timer.seconds() < 2){
+                frenzyBot.getRobotHardware().carouselMotor.setVelocity(-3000);
+            }
+
+            frenzyBot.getRobotHardware().carouselMotor.setPower(0);
+
+            rampSpeedEncoderDrive(0.7, -30, 7);
+
+            encoderTurn(0.7, 35, 7);
+
+            rampSpeedEncoderDrive(0.7, 26, 7);
+
+            break;
+
+        }
     }
+
+    private static class TeamElementDeterminationPipeline extends OpenCvPipeline
+    {
+
+        static Telemetry telemetry;
+
+        public TeamElementDeterminationPipeline(Telemetry tele) {
+            telemetry = tele;
+        }
+
+        String location;
+
+        Rect largest = new Rect(1,1,1,1);
+
+
+        @Override
+        public Mat processFrame(Mat input) {
+            // "Mat" stands for matrix, which is basically the image that the detector will process
+            // the input matrix is the image coming from the camera
+            // the function will return a matrix to be drawn on your phone's screen
+
+            // The detector detects team element The camera fits area for two positions.
+            // If it finds team element in either of these locations, it can identify whether left or middle.
+            // If not team element is on right
+
+            // Make a working copy of the input matrix in HSV
+
+            Mat mat = new Mat();
+            Imgproc.cvtColor(input, mat, Imgproc.COLOR_RGB2HSV);
+
+            // We create a HSV range for yellow to detect regular stones
+            // NOTE: In OpenCV's implementation,
+            // Hue values are half the real value
+            //Scalar lowHSV = new Scalar(20, 100, 100); // lower bound HSV for yellow
+            //Scalar highHSV = new Scalar(30, 255, 255); // higher bound HSV for yellow
+
+            Scalar lowHSV = new Scalar(0, 0, 200); // lower bound HSV for white
+            Scalar highHSV = new Scalar(255, 255, 255); // higher bound HSV for white
+
+            Mat thresh = new Mat();
+
+            // We'll get a black and white image. The white regions represent the regular stones.
+            // inRange(): thresh[i][j] = {255,255,255} if mat[i][i] is within the range
+
+            Core.inRange(mat, lowHSV, highHSV, thresh);
+
+            // Use Canny Edge Detection to find edges
+            // you might have to tune the thresholds for hysteresis
+            Mat edges = new Mat();
+            Imgproc.Canny(thresh, edges, 300, 100);
+
+            // https://docs.opencv.org/3.4/da/d0c/tutorial_bounding_rects_circles.html
+            // Oftentimes the edges are disconnected. findContours connects these edges.
+            // We then find the bounding rectangles of those contours
+            List<MatOfPoint> contours = new ArrayList<>();
+            Mat hierarchy = new Mat();
+            Imgproc.findContours(edges, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+            MatOfPoint2f[] contoursPoly  = new MatOfPoint2f[contours.size()];
+            Rect[] boundRect = new Rect[contours.size()];
+            for (int i = 0; i < contours.size(); i++) {
+                contoursPoly[i] = new MatOfPoint2f();
+                Imgproc.approxPolyDP(new MatOfPoint2f(contours.get(i).toArray()), contoursPoly[i], 3, true);
+                boundRect[i] = Imgproc.boundingRect(new MatOfPoint(contoursPoly[i].toArray()));
+            }
+
+            // Iterate and check whether the bounding boxes
+            // cover left and/or right side of the image
+            boolean left = false; // true if team element found on the left side
+            boolean right = false; // true if found on the right side, indicates middle location
+            for(Rect i : boundRect){
+                if (i.area() > largest.area() && i.x > 160){
+                    largest = i;
+                }
+            }
+
+            if(largest.area() > 875){
+                if(largest.y < 100){
+                    location = "RIGHT";
+                }
+                else{
+                    location = "MIDDLE";
+                }
+            }
+            else{
+                location = "LEFT";
+            }
+
+            return thresh; // return the mat with rectangles drawn
+        }
+        public double getTSEY()
+        {
+            return largest.y;
+        }
+        public double getTSEArea()
+        {
+            return largest.area();
+        }
+        public String getTSELocation(){
+            return location;
+        }
+    }
+
 
     public void turnToAngle(double speed, double desiredAngle, int numLoops)
     {

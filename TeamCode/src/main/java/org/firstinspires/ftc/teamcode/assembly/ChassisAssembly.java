@@ -161,6 +161,10 @@ public class ChassisAssembly
         robotHardware.frontLeftWheel.setPower(frontLeft);
     }
 
+    public double getPosition (){
+        return(robotHardware.backRightWheel.getCurrentPosition() + robotHardware.frontRightWheel.getCurrentPosition() + robotHardware.backLeftWheel.getCurrentPosition() + robotHardware.frontLeftWheel.getCurrentPosition())/4;
+    }
+
 
     /**
      *-----------------------------------------------------------------------------------

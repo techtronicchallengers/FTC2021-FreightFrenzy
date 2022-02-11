@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
@@ -48,11 +49,12 @@ public class TeleOpMode extends LinearOpMode
     //tilter servo variable
     double tiltPos = 0.25;
     //servo positions
-    double flipUp = 0.7;
-    double flipDown = 0.325;
+    double flipUp = 0.78;
+    double flipDown = 0.15;
     double rampUp = 0.45;
     double carouselSpeed = 0;
     double tsePos = 0;
+    int servoSelector = 0;
 
     double liftPosition = 0;
 
@@ -86,6 +88,8 @@ public class TeleOpMode extends LinearOpMode
         // Set up our telemetry dashboard
         //composeTelemetry();
 
+        Servo currentServo = frenzyBot.getRobotHardware().tseServo;
+
         frenzyBot.getRobotHardware().frontRightWheel.setDirection(DcMotorSimple.Direction.REVERSE);
         frenzyBot.getRobotHardware().backRightWheel.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -108,9 +112,10 @@ public class TeleOpMode extends LinearOpMode
             double turn = gamepad1.right_stick_x;
             double normalizer = Math.max(Math.abs(x)+Math.abs(y)+Math.abs(turn), 1);
 
-            telemetry.addData("Motor speed: ", carouselSpeed);
-            telemetry.addData("Servo set position: ", tsePos);
-            telemetry.addData("Servo position: ", frenzyBot.getRobotHardware().intakeBox.getPosition());
+            telemetry.addData("Lift position: ", liftPosition);
+            telemetry.addData("Current Servo: ", currentServo);
+            telemetry.addData("Set position: ", tsePos);
+            telemetry.addData("Current Position: ", currentServo.getPosition());
             telemetry.update();
 
             //Movement
@@ -135,43 +140,45 @@ public class TeleOpMode extends LinearOpMode
             //flipper
             if (gamepad1.y) {
                 frenzyBot.getRobotHardware().intakeBox.setPosition(flipDown);
-                sleep(300);
+                sleep(700);
                 frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
-            }
-
-            //carousel
-            if(gamepad2.a){
-                carouselSpeed += 100;
-                sleep(300);
-            }
-
-            else if(gamepad2.b){
-                carouselSpeed -= 100;
-                sleep(300);
-            }
-
-            if(gamepad2.x){
-                frenzyBot.getRobotHardware().carouselMotor.setVelocity(carouselSpeed);
-                sleep(300);
-            }
-
-            else if (gamepad2.y){
-                frenzyBot.getRobotHardware().carouselMotor.setVelocity(0);
             }
 
             //tse
             if(gamepad2.dpad_up){
-                tsePos += 0.05;
+                tsePos += 0.01;
                 sleep(300);
             }
 
             if(gamepad2.dpad_down){
-                tsePos -= 0.05;
+                tsePos -= 0.01;
                 sleep(300);
             }
 
             if(gamepad2.dpad_right){
-                frenzyBot.getRobotHardware().intakeBox.setPosition(tsePos);
+                currentServo.setPosition(tsePos);
+                sleep(300);
+            }
+
+            if(servoSelector % 3 == 0){
+                currentServo = frenzyBot.getRobotHardware().tseServo;
+            }
+
+            if(servoSelector % 3 == 1){
+                currentServo = frenzyBot.getRobotHardware().rampServo;
+            }
+
+            if(servoSelector % 3 == 2){
+                currentServo = frenzyBot.getRobotHardware().intakeBox;
+            }
+
+            if(gamepad2.a){
+                servoSelector += 1;
+                sleep(300);
+            }
+
+            if(gamepad2.x){
+                servoSelector -= 1;
                 sleep(300);
             }
 
@@ -186,7 +193,7 @@ public class TeleOpMode extends LinearOpMode
 
             else if (gamepad1.dpad_down) {
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frenzyBot.getRobotHardware().lift.setTargetPosition(-810);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(-790);
 
                 frenzyBot.getRobotHardware().intaker.setDirection(DcMotorSimple.Direction.REVERSE);
                 sleep(100);
@@ -196,7 +203,7 @@ public class TeleOpMode extends LinearOpMode
                 frenzyBot.getRobotHardware().lift.setPower(-0.5);
                 sleep(1500);
                 frenzyBot.getRobotHardware().intakeBox.setPosition(flipDown);
-                sleep(300);
+                sleep(700);
                 frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
 
                 frenzyBot.getIntakeAssembly().stopIntake();
@@ -210,8 +217,8 @@ public class TeleOpMode extends LinearOpMode
             }
 
             else if (gamepad1.dpad_up) {
-    /*            frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frenzyBot.getRobotHardware().lift.setTargetPosition(-1425);
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(-1390);
 
                 frenzyBot.getRobotHardware().intaker.setDirection(DcMotorSimple.Direction.REVERSE);
                 sleep(100);
@@ -220,12 +227,15 @@ public class TeleOpMode extends LinearOpMode
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 frenzyBot.getRobotHardware().lift.setPower(-0.5);
                 sleep(1500);
-      */
-                frenzyBot.getRobotHardware().intakeBox.setPosition(flipDown);
-                sleep(1000);
+
+                ElapsedTime timer = new ElapsedTime();
+
+                while(timer.seconds() < 0.2 && frenzyBot.getRobotHardware().intakeBox.getPosition() != flipDown){
+                    frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp - (timer.seconds() * (flipUp - flipDown) / 0.2));
+
+                }
+                sleep(700);
                 frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
-/*
-                sleep(2000);
 
                 frenzyBot.getIntakeAssembly().stopIntake();
 
@@ -235,12 +245,11 @@ public class TeleOpMode extends LinearOpMode
                     frenzyBot.getRobotHardware().lift.setPower(0.5);
                 }
                 frenzyBot.getRobotHardware().lift.setPower(0);
-  */
             }
 
             else if (gamepad1.dpad_right) {
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frenzyBot.getRobotHardware().lift.setTargetPosition(-1100);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(-1085);
 
                 frenzyBot.getRobotHardware().intaker.setDirection(DcMotorSimple.Direction.REVERSE);
                 sleep(100);
@@ -250,7 +259,7 @@ public class TeleOpMode extends LinearOpMode
                 frenzyBot.getRobotHardware().lift.setPower(-0.5);
                 sleep(1500);
                 frenzyBot.getRobotHardware().intakeBox.setPosition(flipDown);
-                sleep(300);
+                sleep(700);
                 frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
 
                 frenzyBot.getIntakeAssembly().stopIntake();
