@@ -664,23 +664,18 @@ public class TeleOpMode extends LinearOpMode
 
             lastError = Error;
 
-            RobotLog.d(time + "," + reference + "," + State + "," + Power + "," + Derivative + "," + frenzyBot.getRobotHardware().imu.getAngularOrientation().firstAngle + "," + frenzyBot.getRobotHardware().imu2.getAngularOrientation().firstAngle);
-
             time += timer.seconds();
 
             timer.reset();
 
-            if (gamepad1.x) {
-                frenzyBot.getChassisAssembly().stopMoving();
-                break;
-            }
-
+            telemetry.addData("State:", State);
+            telemetry.addData("Power:", Power);
+            telemetry.update();
 
         }
 
         frenzyBot.getChassisAssembly().stopMoving();
 
     }
-
 
 }
