@@ -172,6 +172,20 @@ public class TeleOpMode extends LinearOpMode
 
                 frenzyBot.getChassisAssembly().moveForward(-slowFactor*gamepad1.right_stick_y/Math.abs(gamepad1.right_stick_y));
 
+            } else if(gamepad1.left_bumper){
+                frenzyBot.getRobotHardware().frontRightWheel.setPower(0.4);
+                frenzyBot.getRobotHardware().backRightWheel.setPower(0.4);
+                frenzyBot.getRobotHardware().frontLeftWheel.setPower(-0.4);
+                frenzyBot.getRobotHardware().backLeftWheel.setPower(-0.4);
+
+
+            }else if(gamepad1.right_bumper){
+                frenzyBot.getRobotHardware().frontRightWheel.setPower(-0.4);
+                frenzyBot.getRobotHardware().backRightWheel.setPower(-0.4);
+                frenzyBot.getRobotHardware().frontLeftWheel.setPower(0.4);
+                frenzyBot.getRobotHardware().backLeftWheel.setPower(0.4);
+
+
             }
 
             else {
