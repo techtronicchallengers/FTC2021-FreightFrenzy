@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -47,6 +48,8 @@ import java.util.Locale;
 import org.firstinspires.ftc.teamcode.assembly.BobTheDuckBot;
 
 @Autonomous(name = "TSEPickup")
+
+@Disabled
 
 public class TSEPickup extends LinearOpMode
 {

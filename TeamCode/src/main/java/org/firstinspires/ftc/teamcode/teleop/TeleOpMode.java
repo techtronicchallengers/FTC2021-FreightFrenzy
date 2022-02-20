@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -33,6 +34,12 @@ public class TeleOpMode extends LinearOpMode
             (WHEEL_DIAMETER_INCHES * Math.PI);
     final double COUNTS_PER_DEGREE = 9;
     final double distanceBetweenSensors = 11.5;
+    final double lpfConstant = 0.7;
+    double kpt = -0.018;
+    final double kit = 0;
+    double kdt = 0;
+
+    boolean liftRaised = false;
 
     double shooterAngle = 0.85;
     double angleToStraight = 0;
@@ -57,6 +64,10 @@ public class TeleOpMode extends LinearOpMode
     int servoSelector = 0;
 
     double liftPosition = 0;
+
+    double slowFactor = 0.3;
+
+    boolean isSpinning = false;
 
     //Creating a Rover robot object
     BobTheDuckBot frenzyBot = new BobTheDuckBot();
@@ -119,11 +130,56 @@ public class TeleOpMode extends LinearOpMode
             telemetry.update();
 
             //Movement
-            frenzyBot.getRobotHardware().frontRightWheel.setPower((y-x-turn)/normalizer);
-            frenzyBot.getRobotHardware().backRightWheel.setPower((y+x-turn)/normalizer);
-            frenzyBot.getRobotHardware().frontLeftWheel.setPower((y+x+turn)/normalizer);
-            frenzyBot.getRobotHardware().backLeftWheel.setPower((y-x+turn)/normalizer);
 
+            while(liftRaised){
+                if(Math.abs(gamepad1.right_stick_y) > 0.25){
+
+                    frenzyBot.getChassisAssembly().moveForward(-slowFactor*gamepad1.right_stick_y/Math.abs(gamepad1.right_stick_y));
+
+                }
+
+                else {
+                    frenzyBot.getRobotHardware().frontRightWheel.setPower(Math.pow((y - x - turn) / normalizer, 1));
+                    frenzyBot.getRobotHardware().backRightWheel.setPower(Math.pow((y + x - turn) / normalizer, 1));
+                    frenzyBot.getRobotHardware().frontLeftWheel.setPower(Math.pow((y + x + turn) / normalizer, 1));
+                    frenzyBot.getRobotHardware().backLeftWheel.setPower(Math.pow(((y - x + turn) / normalizer), 1));
+                }
+
+                if(gamepad1.y){
+                    ElapsedTime timer = new ElapsedTime();
+
+                    while(timer.seconds() < 0.2 && frenzyBot.getRobotHardware().intakeBox.getPosition() != flipDown){
+                        frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp - (timer.seconds() * (flipUp - flipDown) / 0.2));
+
+                    }
+                    sleep(700);
+                    frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
+
+                    frenzyBot.getIntakeAssembly().stopIntake();
+
+                    sleep(400);
+                    frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    while(!frenzyBot.getRobotHardware().liftLimit.isPressed()){
+                        frenzyBot.getRobotHardware().lift.setPower(0.5);
+                    }
+                    frenzyBot.getRobotHardware().lift.setPower(0);
+                    liftRaised = false;
+                }
+
+            }
+
+            if(Math.abs(gamepad1.right_stick_y) > 0.25){
+
+                frenzyBot.getChassisAssembly().moveForward(-slowFactor*gamepad1.right_stick_y/Math.abs(gamepad1.right_stick_y));
+
+            }
+
+            else {
+                frenzyBot.getRobotHardware().frontRightWheel.setPower(Math.pow((y - x - turn) / normalizer, 1));
+                frenzyBot.getRobotHardware().backRightWheel.setPower(Math.pow((y + x - turn) / normalizer, 1));
+                frenzyBot.getRobotHardware().frontLeftWheel.setPower(Math.pow((y + x + turn) / normalizer, 1));
+                frenzyBot.getRobotHardware().backLeftWheel.setPower(Math.pow(((y - x + turn) / normalizer), 1));
+            }
             //intake
             if (gamepad1.left_trigger > 0.1) {
                 frenzyBot.getRobotHardware().intaker.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -182,13 +238,30 @@ public class TeleOpMode extends LinearOpMode
                 sleep(300);
             }
 
+            if(gamepad1.dpad_left){
+                turnPID(0,5);
+                sleep(500);
+                frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(-1390);
+
+                frenzyBot.getRobotHardware().intaker.setDirection(DcMotorSimple.Direction.REVERSE);
+                sleep(100);
+                frenzyBot.getIntakeAssembly().intake(0.4);
+            }
+
             //lift
             if (gamepad1.left_bumper) {
-                frenzyBot.getRobotHardware().lift.setPower(0.5);
-                }
+                frenzyBot.getRobotHardware().frontRightWheel.setPower(Math.pow((y - x + 0.5) / normalizer, 1));
+                frenzyBot.getRobotHardware().backRightWheel.setPower(Math.pow((y + x + 0.5) / normalizer, 1));
+                frenzyBot.getRobotHardware().frontLeftWheel.setPower(Math.pow((y + x - 0.5) / normalizer, 1));
+                frenzyBot.getRobotHardware().backLeftWheel.setPower(Math.pow(((y - x - 0.5) / normalizer), 1));
+            }
 
             else if (gamepad1.right_bumper){
-                frenzyBot.getRobotHardware().lift.setPower(-0.5);
+                frenzyBot.getRobotHardware().frontRightWheel.setPower(Math.pow((y - x - 0.5) / normalizer, 1));
+                frenzyBot.getRobotHardware().backRightWheel.setPower(Math.pow((y + x - 0.5) / normalizer, 1));
+                frenzyBot.getRobotHardware().frontLeftWheel.setPower(Math.pow((y + x + 0.5) / normalizer, 1));
+                frenzyBot.getRobotHardware().backLeftWheel.setPower(Math.pow(((y - x + 0.5) / normalizer), 1));
             }
 
             else if (gamepad1.dpad_down) {
@@ -274,6 +347,35 @@ public class TeleOpMode extends LinearOpMode
 
             else{
                 frenzyBot.getRobotHardware().lift.setPower(0);
+            }
+
+
+            if(gamepad1.b){
+                isSpinning = true;
+                sleep(300);
+            }
+
+            if(gamepad1.x){
+                isSpinning = true;
+                sleep(300);
+            }
+
+            while(isSpinning){
+                while(frenzyBot.getRobotHardware().carouselMotor.getCurrentPosition() < 1120*(15/4)){
+                    frenzyBot.getRobotHardware().carouselMotor.setPower(0.75);
+                    telemetry.addData("Status:", "turning");
+                    telemetry.addData("Position:", frenzyBot.getRobotHardware().carouselMotor.getCurrentPosition());
+                    telemetry.addData("Power:", frenzyBot.getRobotHardware().carouselMotor.getPower());
+                    telemetry.update();
+                }
+                telemetry.addData("Status:","done");
+                telemetry.update();
+                frenzyBot.getRobotHardware().carouselMotor.setPower(0);
+                sleep(300);
+                if(gamepad1.b){
+                    isSpinning = false;
+                    sleep(100);
+                }
             }
 
         }
@@ -518,5 +620,67 @@ public class TeleOpMode extends LinearOpMode
         angles   = frenzyBot.getRobotHardware().imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
     */
+
+    public void turnPID(double degrees, double margin) {
+
+        frenzyBot.getChassisAssembly().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        frenzyBot.getChassisAssembly().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        double Integral = 0;
+        double lastError = 0;
+        double Derivative;
+        double Power;
+
+        double reference = degrees;
+        double errorMargin = margin;
+
+        double estimate = 0;
+        double lastEstimate = 0;
+
+        double State = frenzyBot.getRobotHardware().imu.getAngularOrientation().firstAngle;
+
+        double Error = reference - State;
+
+        double time = 0;
+
+        ElapsedTime timer = new ElapsedTime();
+
+        while (Math.abs(Error) > errorMargin) {
+
+            State = frenzyBot.getRobotHardware().imu.getAngularOrientation().firstAngle;
+            Error = reference - State;
+
+            double delta = Error - lastError;
+
+            estimate = (1 - lpfConstant) * delta + lpfConstant * lastEstimate;
+
+            Derivative = estimate / timer.seconds();
+            Integral += (Error * timer.seconds());
+            Power = (kpt * Error) + (kit * Integral) + (kdt * Derivative);
+            frenzyBot.getChassisAssembly().turn(Power);
+
+            lastEstimate = estimate;
+
+            lastError = Error;
+
+            RobotLog.d(time + "," + reference + "," + State + "," + Power + "," + Derivative + "," + frenzyBot.getRobotHardware().imu.getAngularOrientation().firstAngle + "," + frenzyBot.getRobotHardware().imu2.getAngularOrientation().firstAngle);
+
+            time += timer.seconds();
+
+            timer.reset();
+
+            if (gamepad1.x) {
+                frenzyBot.getChassisAssembly().stopMoving();
+                break;
+            }
+
+
+        }
+
+        frenzyBot.getChassisAssembly().stopMoving();
+
+    }
+
 
 }
