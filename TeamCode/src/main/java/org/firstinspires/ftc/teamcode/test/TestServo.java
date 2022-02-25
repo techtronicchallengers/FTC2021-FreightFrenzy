@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.assembly.BobTheDuckBot;
 
+@Disabled
 
 @TeleOp(name = "ServoTest", group = "Test")
 public class TestServo extends LinearOpMode

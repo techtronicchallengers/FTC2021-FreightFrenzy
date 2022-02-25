@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.assembly;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.assembly.RobotHardware;
 
@@ -256,5 +257,45 @@ public class ChassisAssembly
     public void setBackRightWheelTargetPosition(int position) {robotHardware.backRightWheel.setTargetPosition(position);}
     public void setFrontLeftWheelTargetPosition(int position) {robotHardware.frontLeftWheel.setTargetPosition(position);}
     public void setFrontRightWeelTargetPosition(int position) {robotHardware.frontRightWheel.setTargetPosition(position);}
+
+    public void allowMovement(Gamepad gamepad1){
+        double slowFactor = 0.3;
+
+        double y = -gamepad1.left_stick_y;
+
+        double x;
+
+        if(Math.abs(gamepad1.left_stick_x) > (Math.sqrt(2)/2)){
+            x = gamepad1.left_stick_x;
+        }
+
+        else{
+            x = 0;
+        }
+
+        double turn = gamepad1.right_stick_x;
+        double normalizer = Math.max(Math.abs(x)+Math.abs(y)+Math.abs(turn), 1);
+
+        //Movement
+        if(Math.abs(gamepad1.right_stick_y) > 0.25){
+            moveForward(-slowFactor*gamepad1.right_stick_y/Math.abs(gamepad1.right_stick_y));
+        }
+
+        else if(gamepad1.left_bumper){
+            turn(-slowFactor);
+        }
+
+        else if(gamepad1.right_bumper){
+            turn(slowFactor);
+        }
+
+        else {
+            robotHardware.frontRightWheel.setPower(Math.pow((y - x - turn) / normalizer, 1));
+            robotHardware.backRightWheel.setPower(Math.pow((y + x - turn) / normalizer, 1));
+            robotHardware.frontLeftWheel.setPower(Math.pow((y + x + turn) / normalizer, 1));
+            robotHardware.backLeftWheel.setPower(Math.pow(((y - x + turn) / normalizer), 1));
+        }
+
+    }
 
 }

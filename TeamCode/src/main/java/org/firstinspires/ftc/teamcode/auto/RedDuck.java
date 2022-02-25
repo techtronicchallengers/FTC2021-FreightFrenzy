@@ -2,20 +2,13 @@ package org.firstinspires.ftc.teamcode.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.teamcode.assembly.ChassisAssembly;
-import org.firstinspires.ftc.teamcode.assembly.SensorNavigation;
-import org.firstinspires.ftc.teamcode.assembly.VisualCortex;
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Func;
@@ -30,7 +23,6 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -119,11 +111,11 @@ public class RedDuck extends LinearOpMode
 
             encoderTurn(0.7, -55, 7);
 
-            rampSpeedEncoderDrive(0.7,-16,7);
+            rampSpeedEncoderDrive(0.7,-14,7);
 
             if(position.equals("LEFT")){
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frenzyBot.getRobotHardware().lift.setTargetPosition(-790);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(-815);
 
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 frenzyBot.getRobotHardware().lift.setPower(-0.5);
@@ -161,6 +153,7 @@ public class RedDuck extends LinearOpMode
             }
 
             else if(position.equals("RIGHT")){
+                rampSpeedEncoderDrive(0.5, -3, 7);
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 frenzyBot.getRobotHardware().lift.setTargetPosition(-1590);
 
@@ -177,6 +170,7 @@ public class RedDuck extends LinearOpMode
                     frenzyBot.getRobotHardware().lift.setPower(0.5);
                 }
                 frenzyBot.getRobotHardware().lift.setPower(0);
+                rampSpeedEncoderDrive(0.5, 3, 7);
             }
 
             rampSpeedEncoderDrive(0.7, 42, 7);
@@ -185,17 +179,17 @@ public class RedDuck extends LinearOpMode
 
             ElapsedTime timer = new ElapsedTime();
 
-            while(timer.seconds() < 2){
-                frenzyBot.getRobotHardware().carouselMotor.setVelocity(3000);
+            while(timer.seconds() < 5){
+                frenzyBot.getRobotHardware().carouselMotor.setVelocity(2000);
             }
 
             frenzyBot.getRobotHardware().carouselMotor.setPower(0);
 
             encoderTurn(0.7, -28, 7);
 
-            rampSpeedEncoderDrive(0.7, -35, 7);
+            rampSpeedEncoderDrive(0.7, -38, 7);
 
-            encoderTurn(0.7, -35, 7);
+            encoderTurn(0.7, -40, 7);
 
             rampSpeedEncoderDrive(0.7, 30, 7);
 
@@ -272,7 +266,7 @@ public class RedDuck extends LinearOpMode
             // Iterate and check whether the bounding boxes
             // cover left and/or right side of the image
             for(Rect i : boundRect){
-                if (i.area() > largest.area() && i.x > 160 && i.area() < 2600){
+                if (i.area() > largest.area() && i.x > 160 && i.area() < 2000){
                     largest = i;
                 }
             }

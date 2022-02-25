@@ -35,6 +35,7 @@ public class RobotHardware
     public Servo intakeBox = null;
     public Servo rampServo = null;
     public Servo tseServo = null;
+    public Servo gate = null;
 
     public TouchSensor liftLimit = null;
 
@@ -107,7 +108,7 @@ public class RobotHardware
         intakeBox = hwMap.get(Servo.class, "intakeBox");
         rampServo = hwMap.get(Servo.class, "rampServo");
         tseServo = hwMap.get(Servo.class, "tseServo");
-
+        gate = hwMap.get(Servo.class, "gate");
 
         liftLimit = hwMap.get(TouchSensor.class, "liftLimit");
 
