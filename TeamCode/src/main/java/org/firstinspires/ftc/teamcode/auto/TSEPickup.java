@@ -193,9 +193,9 @@ public class TSEPickup extends LinearOpMode
 
     void readAngle()
     {
-        angles   = frenzyBot.getRobotHardware().imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+    //    angles   = frenzyBot.getRobotHardware().imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
-
+/*
     void composeTelemetry() {
 
         // At the beginning of each telemetry update, grab a bunch of data
@@ -264,11 +264,6 @@ public class TSEPickup extends LinearOpMode
     }
 
 
-    /**
-     *ENCODER DRIVE METHOD
-     * @param speed (at which the robot should move)
-     * @param inches (positive is forward, negative is backwards)
-     * @param timeoutS (the robot will stop moving if it after this many seconds)
      */
     public void rampSpeedEncoderDrive(double speed, double inches, double timeoutS)
     {

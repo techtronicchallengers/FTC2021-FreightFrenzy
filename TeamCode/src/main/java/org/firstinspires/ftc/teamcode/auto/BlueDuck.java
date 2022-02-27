@@ -2,12 +2,21 @@ package org.firstinspires.ftc.teamcode.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.teamcode.BotConstants;
+import org.firstinspires.ftc.teamcode.assembly.ChassisAssembly;
+import org.firstinspires.ftc.teamcode.assembly.SensorNavigation;
+import org.firstinspires.ftc.teamcode.assembly.VisualCortex;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Func;
@@ -22,6 +31,7 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -45,8 +55,12 @@ public class BlueDuck extends LinearOpMode
     final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * Math.PI);
     final double COUNTS_PER_DEGREE = 8.0;
+
     BobTheDuckBot frenzyBot = new BobTheDuckBot();
+    ChassisAssembly chassis = null;
+
     ElapsedTime runtime = new ElapsedTime();
+
     Orientation angles;
     Acceleration gravity;
 
@@ -110,7 +124,8 @@ public class BlueDuck extends LinearOpMode
 
             if(position.equals("LEFT")){
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frenzyBot.getRobotHardware().lift.setTargetPosition(-815);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(BotConstants.AUTO_LOW);
+
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 frenzyBot.getRobotHardware().lift.setPower(-0.5);
                 sleep(1500);
@@ -127,14 +142,18 @@ public class BlueDuck extends LinearOpMode
 
             else if(position.equals("MIDDLE")){
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frenzyBot.getRobotHardware().lift.setTargetPosition(-1085);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(BotConstants.AUTO_MID);
+
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 frenzyBot.getRobotHardware().lift.setPower(-0.5);
                 sleep(1500);
+
                 frenzyBot.getRobotHardware().intakeBox.setPosition(flipDown);
                 sleep(700);
                 frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
+
                 sleep(400);
+
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 while(!frenzyBot.getRobotHardware().liftLimit.isPressed()){
                     frenzyBot.getRobotHardware().lift.setPower(0.5);
@@ -144,13 +163,15 @@ public class BlueDuck extends LinearOpMode
 
             else if(position.equals("RIGHT")){
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frenzyBot.getRobotHardware().lift.setTargetPosition(-1390);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(BotConstants.AUTO_HIGH);
+
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 frenzyBot.getRobotHardware().lift.setPower(-0.5);
                 sleep(1500);
                 frenzyBot.getRobotHardware().intakeBox.setPosition(flipDown);
                 sleep(700);
                 frenzyBot.getRobotHardware().intakeBox.setPosition(flipUp);
+
                 sleep(400);
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 while(!frenzyBot.getRobotHardware().liftLimit.isPressed()){
@@ -163,17 +184,17 @@ public class BlueDuck extends LinearOpMode
 
             ElapsedTime timer = new ElapsedTime();
 
-            while(timer.seconds() < 5){
-                frenzyBot.getRobotHardware().carouselMotor.setVelocity(-2000);
+            while(timer.seconds() < 2.5){
+                frenzyBot.getRobotHardware().carouselMotor.setVelocity(-2500);
             }
 
             frenzyBot.getRobotHardware().carouselMotor.setPower(0);
 
-            rampSpeedEncoderDrive(0.7, -34, 7);
+            rampSpeedEncoderDrive(0.7, -32, 7);
 
-            encoderTurn(0.7, 40, 7);
+            encoderTurn(0.7, 35, 7);
 
-            rampSpeedEncoderDrive(0.7, 28, 7);
+            rampSpeedEncoderDrive(0.7, 26, 7);
 
             break;
 
@@ -215,8 +236,8 @@ public class BlueDuck extends LinearOpMode
             //Scalar lowHSV = new Scalar(20, 100, 100); // lower bound HSV for yellow
             //Scalar highHSV = new Scalar(30, 255, 255); // higher bound HSV for yellow
 
-            Scalar lowHSV = new Scalar(0, 0, 200); // lower bound HSV for white
-            Scalar highHSV = new Scalar(255, 255, 255); // higher bound HSV for white
+            Scalar lowHSV = new Scalar(0, 75, 0); // lower bound HSV for white
+            Scalar highHSV = new Scalar(200, 255, 200); // higher bound HSV for white
 
             Mat thresh = new Mat();
 
@@ -255,7 +276,7 @@ public class BlueDuck extends LinearOpMode
                 }
             }
 
-            if(largest.area() > 800){
+            if(largest.area() > 875){
                 if(largest.y < 100){
                     location = "RIGHT";
                 }
@@ -282,7 +303,7 @@ public class BlueDuck extends LinearOpMode
         }
     }
 
-
+    /*
     public void turnToAngle(double speed, double desiredAngle, int numLoops)
     {
         double currentAngle = angles.firstAngle;
@@ -391,11 +412,7 @@ public class BlueDuck extends LinearOpMode
     }
 
 
-    /**
-     *ENCODER DRIVE METHOD
-     * @param speed (at which the robot should move)
-     * @param inches (positive is forward, negative is backwards)
-     * @param timeoutS (the robot will stop moving if it after this many seconds)
+
      */
     public void rampSpeedEncoderDrive(double speed, double inches, double timeoutS)
     {
@@ -578,7 +595,7 @@ public class BlueDuck extends LinearOpMode
             frenzyBot.getChassisAssembly().setFrontRightWeelTargetPosition(newFrontRightTarget);
 
             // Turn On RUN_TO_POSITION
-                    frenzyBot.getChassisAssembly().setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            frenzyBot.getChassisAssembly().setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // keep looping while we are still active, and there is time left, and both motors are running.
             // reset the timeout time and start motion.

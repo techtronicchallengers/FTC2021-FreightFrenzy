@@ -100,10 +100,10 @@ public class BlueLeft extends LinearOpMode
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
         // and named "imu".
-        frenzyBot.getRobotHardware().imu.initialize(parameters);
+        //frenzyBot.getRobotHardware().imu.initialize(parameters);
 
         // Set up our telemetry dashboard
-        composeTelemetry();
+        //composeTelemetry();
         telemetry.update();
 
         //Initilize Vuforia and tensor flow
@@ -179,9 +179,10 @@ public class BlueLeft extends LinearOpMode
 
     void readAngle()
     {
-        angles   = frenzyBot.getRobotHardware().imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        //angles   = frenzyBot.getRobotHardware().imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
 
+    /*
     void composeTelemetry() {
 
         // At the beginning of each telemetry update, grab a bunch of data
@@ -273,13 +274,6 @@ public class BlueLeft extends LinearOpMode
     }
      */
 
-
-    /**
-     *ENCODER DRIVE METHOD
-     * @param speed (at which the robot should move)
-     * @param inches (positive is forward, negative is backwards)
-     * @param timeoutS (the robot will stop moving if it after this many seconds)
-     */
     public void rampSpeedEncoderDrive(double speed, double inches, double timeoutS)
     {
         double setSpeed = speed;

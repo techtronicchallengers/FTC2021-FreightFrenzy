@@ -79,7 +79,7 @@ public class TeleOpMode extends LinearOpMode
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
         // and named "imu".
-        frenzyBot.getRobotHardware().imu.initialize(parameters);
+      //  frenzyBot.getRobotHardware().imu.initialize(parameters);
 
         // Set up our telemetry dashboard
         //composeTelemetry();
@@ -154,7 +154,7 @@ public class TeleOpMode extends LinearOpMode
                 frenzyBot.getRobotHardware().lift.setPower(0);
             }
 
-            else if (gamepad1.dpad_up && !liftRaised) {
+            else if (gamepad1.dpad_up) {
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 frenzyBot.getRobotHardware().intaker.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -219,27 +219,24 @@ public class TeleOpMode extends LinearOpMode
                 frenzyBot.getRobotHardware().lift.setPower(0);
             }
 
-            if(gamepad1.dpad_up && liftRaised){
-                frenzyBot.getRobotHardware().gate.setPosition(gateOpen);
-                sleep(400);
-                frenzyBot.getRobotHardware().gate.setPosition(gateClosed);
-                liftRaised = false;
-            }
-
             if((gamepad1.b) && frenzyBot.getRobotHardware().carouselMotor.getPower() < -0.95){
                 frenzyBot.getRobotHardware().carouselMotor.setPower(0);
+                sleep(200);
             }
 
             else if(gamepad1.b){
                 frenzyBot.getRobotHardware().carouselMotor.setPower(-1);
+                sleep(200);
             }
 
             if(gamepad1.x && frenzyBot.getRobotHardware().carouselMotor.getPower() > 0.95){
                 frenzyBot.getRobotHardware().carouselMotor.setPower(0);
+                sleep(200);
             }
 
             else if(gamepad1.x){
                 frenzyBot.getRobotHardware().carouselMotor.setPower(1);
+                sleep(200);
             }
 
 
@@ -486,7 +483,7 @@ public class TeleOpMode extends LinearOpMode
     }
     */
 
-    public void turnPID(double degrees, double margin) {
+    /*public void turnPID(double degrees, double margin) {
 
         frenzyBot.getChassisAssembly().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -541,6 +538,6 @@ public class TeleOpMode extends LinearOpMode
 
         frenzyBot.getChassisAssembly().stopMoving();
 
-    }
+    }*/
 
 }

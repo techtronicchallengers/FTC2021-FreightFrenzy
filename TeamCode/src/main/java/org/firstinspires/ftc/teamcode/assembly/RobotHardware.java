@@ -42,8 +42,8 @@ public class RobotHardware
     //Webcam
     public WebcamName webcam = null;
 
-    public BNO055IMU imu = null;
-    public BNO055IMU imu2 = null;
+    /*public BNO055IMU imu = null;
+    public BNO055IMU imu2 = null;*/
 
     //Distance Sensors
     //Rev2mDistanceSensor frontRightSensor = null;
@@ -72,8 +72,8 @@ public class RobotHardware
     {
         hwMap = ahwMap;
         webcam = hwMap.get(WebcamName.class, "webcam");
-        imu = hwMap.get(BNO055IMU.class, "imu");
-        imu2 = hwMap.get(BNO055IMU.class, "imu2");
+        /*imu = hwMap.get(BNO055IMU.class, "imu");
+        imu2 = hwMap.get(BNO055IMU.class, "imu2");*/
        // wheelServo = hwMap.get(CRServo.class, "wheelServo");
 
         //Wheel motors

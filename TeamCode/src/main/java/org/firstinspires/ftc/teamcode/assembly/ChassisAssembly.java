@@ -259,7 +259,7 @@ public class ChassisAssembly
     public void setFrontRightWeelTargetPosition(int position) {robotHardware.frontRightWheel.setTargetPosition(position);}
 
     public void allowMovement(Gamepad gamepad1){
-        double slowFactor = 0.3;
+        double slowFactor = 0.5;
 
         double y = -gamepad1.left_stick_y;
 
@@ -278,7 +278,7 @@ public class ChassisAssembly
 
         //Movement
         if(Math.abs(gamepad1.right_stick_y) > 0.25){
-            moveForward(-slowFactor*gamepad1.right_stick_y/Math.abs(gamepad1.right_stick_y));
+            moveForward(-0.25*gamepad1.right_stick_y/Math.abs(gamepad1.right_stick_y));
         }
 
         else if(gamepad1.left_bumper){

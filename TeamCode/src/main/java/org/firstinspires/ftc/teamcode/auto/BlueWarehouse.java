@@ -11,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.teamcode.BotConstants;
 import org.firstinspires.ftc.teamcode.assembly.ChassisAssembly;
 import org.firstinspires.ftc.teamcode.assembly.SensorNavigation;
 import org.firstinspires.ftc.teamcode.assembly.VisualCortex;
@@ -112,17 +113,17 @@ public class BlueWarehouse extends LinearOpMode
 
             sleep(1000);
 
-            rampSpeedEncoderDrive(0.7, -17, 7);
+            rampSpeedEncoderDrive(0.7, -18, 7);
 
             sleep(300);
+            encoderTurn(0.7, 50, 3);
+            encoderTurn(0.7, -90, 3);
 
-            encoderTurn(0.7, -40, 7);
-
-            rampSpeedEncoderDrive(0.7,-10.5,7);
+            rampSpeedEncoderDrive(0.7,-10,7);
 
             if(position.equals("LEFT")){
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frenzyBot.getRobotHardware().lift.setTargetPosition(-790);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(BotConstants.AUTO_LOW);
 
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 frenzyBot.getRobotHardware().lift.setPower(-0.5);
@@ -140,7 +141,7 @@ public class BlueWarehouse extends LinearOpMode
 
             else if(position.equals("MIDDLE")){
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frenzyBot.getRobotHardware().lift.setTargetPosition(-1085);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(BotConstants.AUTO_MID);
 
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 frenzyBot.getRobotHardware().lift.setPower(-0.5);
@@ -161,7 +162,7 @@ public class BlueWarehouse extends LinearOpMode
 
             else if(position.equals("RIGHT")){
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frenzyBot.getRobotHardware().lift.setTargetPosition(-1590);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(BotConstants.AUTO_HIGH);
 
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 frenzyBot.getRobotHardware().lift.setPower(-0.5);
@@ -178,15 +179,16 @@ public class BlueWarehouse extends LinearOpMode
                 frenzyBot.getRobotHardware().lift.setPower(0);
             }
 
-            rampSpeedEncoderDrive(0.7, 11, 7);
+            rampSpeedEncoderDrive(0.7, 11, 3);
 
-            ElapsedTime timer = new ElapsedTime();
 
             encoderTurn(0.7,-55, 5);
 
-            rampSpeedEncoderDrive(0.7,40,7);
+            rampSpeedEncoderDrive(1,40,7);
             //stop = false;
-stop();
+
+
+            stop();
         }
     }
 
@@ -225,8 +227,8 @@ stop();
             //Scalar lowHSV = new Scalar(20, 100, 100); // lower bound HSV for yellow
             //Scalar highHSV = new Scalar(30, 255, 255); // higher bound HSV for yellow
 
-            Scalar lowHSV = new Scalar(0, 0, 200); // lower bound HSV for white
-            Scalar highHSV = new Scalar(255, 255, 255); // higher bound HSV for white
+            Scalar lowHSV = new Scalar(0, 75, 0); // lower bound HSV for white
+            Scalar highHSV = new Scalar(200, 255, 200); // higher bound HSV for white
 
             Mat thresh = new Mat();
 
@@ -300,7 +302,7 @@ stop();
 
         for(int i = 0; i < numLoops; i++)
         {
-            readAngle();
+//            readAngle();
             currentAngle = angles.firstAngle;
             angleToTurn = desiredAngle - currentAngle;
 
@@ -327,7 +329,7 @@ stop();
         telemetry.update();
     }
 
-
+/*
     void readAngle()
     {
         angles   = frenzyBot.getRobotHardware().imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -399,14 +401,7 @@ stop();
     String formatDegrees(double degrees){
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
-
-
-    /**
-     *ENCODER DRIVE METHOD
-     * @param speed (at which the robot should move)
-     * @param inches (positive is forward, negative is backwards)
-     * @param timeoutS (the robot will stop moving if it after this many seconds)
-     */
+   */
 
     public void rampSpeedEncoderDrive(double speed, double inches, double timeoutS)
     {

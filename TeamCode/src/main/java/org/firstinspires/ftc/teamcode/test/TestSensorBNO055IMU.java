@@ -26,7 +26,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+/*
 package org.firstinspires.ftc.teamcode.test;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -50,14 +50,13 @@ import org.firstinspires.ftc.teamcode.assembly.BobTheDuckBot;
 
 import java.util.Locale;
 
-/**
  * {@link TestSensorBNO055IMU} gives a short demo on how to use the BNO055 Inertial Motion Unit (IMU) from AdaFruit.
  *
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  *
  * @see <a href="http://www.adafruit.com/products/2472">Adafruit IMU</a>
- */
+
 @Disabled
 @TeleOp(name = "GyroTest", group = "Test")
 public class TestSensorBNO055IMU extends LinearOpMode
@@ -352,7 +351,6 @@ public class TestSensorBNO055IMU extends LinearOpMode
          * @param speed (at which the robot should move)
          * @param inches (positive is forward, negative is backwards)
          * @param timeoutS (the robot will stop moving if it after this many seconds)
-         */
         public void encoderDrive(double speed, double inches, double timeoutS)
         {
             int newBackLeftTarget;
@@ -589,3 +587,5 @@ public class TestSensorBNO055IMU extends LinearOpMode
             }
         }
 }
+
+*/

@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.BotConstants;
 import org.firstinspires.ftc.teamcode.assembly.ChassisAssembly;
 import com.qualcomm.robotcore.util.RobotLog;
 
@@ -115,7 +116,7 @@ public class RedDuck extends LinearOpMode
 
             if(position.equals("LEFT")){
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frenzyBot.getRobotHardware().lift.setTargetPosition(-815);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(BotConstants.AUTO_LOW);
 
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 frenzyBot.getRobotHardware().lift.setPower(-0.5);
@@ -133,7 +134,7 @@ public class RedDuck extends LinearOpMode
 
             else if(position.equals("MIDDLE")){
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frenzyBot.getRobotHardware().lift.setTargetPosition(-1085);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(BotConstants.AUTO_MID);
 
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 frenzyBot.getRobotHardware().lift.setPower(-0.5);
@@ -155,7 +156,7 @@ public class RedDuck extends LinearOpMode
             else if(position.equals("RIGHT")){
                 rampSpeedEncoderDrive(0.5, -3, 7);
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                frenzyBot.getRobotHardware().lift.setTargetPosition(-1590);
+                frenzyBot.getRobotHardware().lift.setTargetPosition(BotConstants.AUTO_HIGH);
 
                 frenzyBot.getRobotHardware().lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 frenzyBot.getRobotHardware().lift.setPower(-0.5);
@@ -173,7 +174,7 @@ public class RedDuck extends LinearOpMode
                 rampSpeedEncoderDrive(0.5, 3, 7);
             }
 
-            rampSpeedEncoderDrive(0.7, 42, 7);
+            rampSpeedEncoderDrive(0.7, 43, 7);
 
             encoderTurn(0.7, 28, 7);
 
@@ -189,9 +190,9 @@ public class RedDuck extends LinearOpMode
 
             rampSpeedEncoderDrive(0.7, -38, 7);
 
-            encoderTurn(0.7, -40, 7);
+            encoderTurn(0.7, -37, 7);
 
-            rampSpeedEncoderDrive(0.7, 30, 7);
+            rampSpeedEncoderDrive(0.7, 32, 7);
 
             break;
 
@@ -233,8 +234,8 @@ public class RedDuck extends LinearOpMode
             //Scalar lowHSV = new Scalar(20, 100, 100); // lower bound HSV for yellow
             //Scalar highHSV = new Scalar(30, 255, 255); // higher bound HSV for yellow
 
-            Scalar lowHSV = new Scalar(0, 0, 200); // lower bound HSV for white
-            Scalar highHSV = new Scalar(255, 255, 255); // higher bound HSV for white
+            Scalar lowHSV = new Scalar(0, 75, 0); // lower bound HSV for white
+            Scalar highHSV = new Scalar(200, 255, 200); // higher bound HSV for white
 
             Mat thresh = new Mat();
 
@@ -335,8 +336,10 @@ public class RedDuck extends LinearOpMode
 
     void readAngle()
     {
-        angles   = frenzyBot.getRobotHardware().imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+       // angles   = frenzyBot.getRobotHardware().imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
+
+    /*
 
     void composeTelemetry() {
 
@@ -406,12 +409,8 @@ public class RedDuck extends LinearOpMode
     }
 
 
-    /**
-     *ENCODER DRIVE METHOD
-     * @param speed (at which the robot should move)
-     * @param inches (positive is forward, negative is backwards)
-     * @param timeoutS (the robot will stop moving if it after this many seconds)
      */
+
     public void rampSpeedEncoderDrive(double speed, double inches, double timeoutS)
     {
         double setSpeed = speed;
